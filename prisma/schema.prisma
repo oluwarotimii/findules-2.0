@@ -1,0 +1,295 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id               String            @id @default(cuid()) @db.VarChar(20)
+  name             String            @db.VarChar(100)
+  email            String            @unique @db.VarChar(100)
+  passwordHash     String            @db.Text
+  role             Role              @default(STAFF)
+  branchId         String            @db.VarChar(20)
+  status           Status            @default(ACTIVE)
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+  auditLogs        AuditLog[]
+  cashRequisitions CashRequisition[]
+  fuelCoupons      FuelCoupon[]
+  imprestIssued    Imprest[]         @relation("ImprestIssuer")
+  imprestRetired   Imprest[]         @relation("ImprestRetirer")
+  branch           Branch            @relation(fields: [branchId], references: [branchId])
+
+  @@index([email])
+  @@index([branchId])
+  @@index([status])
+  @@map("users")
+}
+
+model Branch {
+  branchId         String            @id @db.VarChar(20)
+  branchName       String            @db.VarChar(100)
+  branchCode       String            @db.VarChar(10)
+  location         String?           @db.VarChar(100)
+  status           Status            @default(ACTIVE)
+  createdAt        DateTime          @default(now())
+  cashRequisitions CashRequisition[]
+  cashiers         Cashier[]
+  fuelCoupons      FuelCoupon[]
+  imprest          Imprest[]
+  reconciliations  Reconciliation[]
+  users            User[]
+
+  @@map("branches")
+}
+
+model CashRequisition {
+  requisitionNo    String              @id @db.VarChar(20)
+  title            String              @db.VarChar(200)
+  amount           Decimal             @db.Decimal(15, 2)
+  category         RequisitionCategory
+  department       String              @db.VarChar(100)
+  purpose          String              @db.Text
+  requestedBy      String              @db.VarChar(100)
+  dateNeeded       DateTime            @db.Date
+  dateRecorded     DateTime            @default(now())
+  recordedBy       String              @db.VarChar(20)
+  status           RequisitionStatus   @default(RECORDED)
+  paymentDate      DateTime?           @db.Date
+  paymentMethod    PaymentMethod?
+  paymentReference String?             @db.VarChar(50)
+  amountPaid       Decimal?            @db.Decimal(15, 2)
+  paidBy           String?             @db.VarChar(20)
+  branchId         String              @db.VarChar(20)
+  branch           Branch              @relation(fields: [branchId], references: [branchId])
+  recordedByUser   User                @relation(fields: [recordedBy], references: [id])
+
+  @@index([branchId, status])
+  @@index([dateRecorded])
+  @@index([status])
+  @@index([requestedBy])
+  @@index([department])
+  @@index([category])
+  @@index([dateNeeded])
+  @@index([recordedBy], map: "cash_requisitions_recordedBy_fkey")
+  @@map("cash_requisitions")
+}
+
+model Reconciliation {
+  serialNumber               String            @id @db.VarChar(20)
+  date                       DateTime          @db.Date
+  cashierId                  String            @db.VarChar(50)
+  cashierName                String            @db.VarChar(100)
+  branchId                   String            @db.VarChar(20)
+  expectedOpeningBalance     Decimal           @default(0.00) @db.Decimal(15, 2)
+  actualOpeningBalance       Decimal           @default(0.00) @db.Decimal(15, 2)
+  openingVariance            Decimal           @default(0.00) @db.Decimal(15, 2)
+  openingVarianceExplanation String?           @db.Text
+  expectedTotalSales         Decimal           @default(0.00) @db.Decimal(15, 2)
+  actualTotalSales           Decimal           @default(0.00) @db.Decimal(15, 2)
+  posTransactionsAmount      Decimal           @default(0.00) @db.Decimal(15, 2)
+  cashSales                  Decimal           @default(0.00) @db.Decimal(15, 2)
+  discountsGiven             Decimal           @default(0.00) @db.Decimal(15, 2)
+  refundsIssued              Decimal           @default(0.00) @db.Decimal(15, 2)
+  turnOver                   Decimal           @default(0.00) @db.Decimal(15, 2)
+  cashWithdrawn              Decimal           @default(0.00) @db.Decimal(15, 2)
+  withdrawalDetails          String?           @db.LongText
+  tellerNo                   String?           @db.VarChar(20)
+  bankName                   String?           @db.VarChar(100)
+  branchLocation             String?           @db.VarChar(100)
+  depositSlipNo              String?           @db.VarChar(50)
+  depositSlipUpload          String?           @db.VarChar(255)
+  transfersOut               Decimal           @default(0.00) @db.Decimal(15, 2)
+  transferDetails            String?           @db.LongText
+  expectedClosingBalance     Decimal           @default(0.00) @db.Decimal(15, 2)
+  actualClosingBalance       Decimal           @default(0.00) @db.Decimal(15, 2)
+  overageShortage            Decimal           @default(0.00) @db.Decimal(15, 2)
+  varianceCategory           VarianceCategory?
+  remarks                    String?           @db.Text
+  cashierSignature           String?           @db.VarChar(255)
+  supervisorName             String?           @db.VarChar(100)
+  supervisorSignature        String?           @db.VarChar(255)
+  supervisorComments         String?           @db.Text
+  submittedAt                DateTime          @default(now())
+  submittedBy                String            @db.VarChar(20)
+  approvalStatus             ApprovalStatus    @default(SUBMITTED)
+  createdAt                  DateTime          @default(now())
+  updatedAt                  DateTime          @updatedAt
+  createdByIp                String?           @db.VarChar(45)
+  lastModifiedBy             String?           @db.VarChar(20)
+  branch                     Branch            @relation(fields: [branchId], references: [branchId])
+  cashier                    Cashier           @relation(fields: [cashierId], references: [id])
+
+  @@index([branchId, date])
+  @@index([cashierId, date])
+  @@index([date])
+  @@index([varianceCategory])
+  @@map("reconciliations")
+}
+
+model Cashier {
+  id              String           @id @default(cuid()) @db.VarChar(50)
+  name            String           @db.VarChar(100)
+  branchId        String           @db.VarChar(20)
+  status          Status           @default(ACTIVE)
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  branch          Branch           @relation(fields: [branchId], references: [branchId])
+  reconciliations Reconciliation[]
+
+  @@index([branchId])
+  @@map("cashiers")
+}
+
+model FuelCoupon {
+  documentCode    String   @id @db.VarChar(20)
+  date            DateTime @db.Date
+  staffName       String   @db.VarChar(100)
+  department      String   @db.VarChar(100)
+  unit            String?  @db.VarChar(100)
+  vehicleType     String?  @db.VarChar(100)
+  plateNumber     String?  @db.VarChar(20)
+  purpose         String?  @db.Text
+  fuelType        FuelType
+  quantityLitres  Decimal  @db.Decimal(10, 2)
+  estimatedAmount Decimal  @db.Decimal(15, 2)
+  createdBy       String   @db.VarChar(20)
+  createdAt       DateTime @default(now())
+  branchId        String   @db.VarChar(20)
+  pdfGenerated    Boolean  @default(false)
+  pdfFilePath     String?  @db.VarChar(255)
+  branch          Branch   @relation(fields: [branchId], references: [branchId])
+  creator         User     @relation(fields: [createdBy], references: [id])
+
+  @@index([branchId, date])
+  @@index([date])
+  @@index([staffName])
+  @@index([department])
+  @@index([fuelType])
+  @@index([plateNumber])
+  @@index([createdBy], map: "fuel_coupons_createdBy_fkey")
+  @@map("fuel_coupons")
+}
+
+model Imprest {
+  imprestNo       String          @id @db.VarChar(20)
+  staffName       String          @db.VarChar(100)
+  amount          Decimal         @db.Decimal(15, 2)
+  category        ImprestCategory
+  purpose         String          @db.Text
+  dateIssued      DateTime        @db.Date
+  issuedBy        String          @db.VarChar(20)
+  status          ImprestStatus   @default(ISSUED)
+  dateRetired     DateTime?       @db.Date
+  amountSpent     Decimal?        @db.Decimal(15, 2)
+  balance         Decimal?        @db.Decimal(15, 2)
+  receipts        String?         @db.LongText
+  retirementNotes String?         @db.Text
+  retiredBy       String?         @db.VarChar(20)
+  branchId        String          @db.VarChar(20)
+  createdAt       DateTime        @default(now())
+  updatedAt       DateTime        @updatedAt
+  branch          Branch          @relation(fields: [branchId], references: [branchId])
+  issuer          User            @relation("ImprestIssuer", fields: [issuedBy], references: [id])
+  retirer         User?           @relation("ImprestRetirer", fields: [retiredBy], references: [id], onDelete: Restrict)
+
+  @@index([branchId, status])
+  @@index([dateIssued])
+  @@index([dateRetired])
+  @@index([status])
+  @@index([staffName])
+  @@index([category])
+  @@index([issuedBy], map: "imprest_issuedBy_fkey")
+  @@index([retiredBy], map: "imprest_retiredBy_fkey")
+  @@map("imprest")
+}
+
+model AuditLog {
+  id        Int      @id @default(autoincrement())
+  timestamp DateTime @default(now())
+  userId    String   @db.VarChar(20)
+  action    String   @db.VarChar(50)
+  module    String?  @db.VarChar(50)
+  details   Json?    @db.Json
+  ipAddress String?  @db.VarChar(45)
+  user      User     @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([timestamp])
+  @@index([module])
+  @@map("audit_logs")
+}
+
+enum Role {
+  STAFF
+  MANAGER
+}
+
+enum Status {
+  ACTIVE
+  INACTIVE
+}
+
+enum RequisitionCategory {
+  OPERATIONAL
+  TRAVEL
+  SUPPLIES
+  EMERGENCY
+  OTHER
+}
+
+enum RequisitionStatus {
+  RECORDED
+  PAID
+  CANCELLED
+}
+
+enum PaymentMethod {
+  CASH
+  BANK_TRANSFER
+  CHEQUE
+}
+
+enum Shift {
+  MORNING
+  AFTERNOON
+  EVENING
+  NIGHT
+}
+
+enum VarianceCategory {
+  NO_VARIANCE
+  MINOR_SHORTAGE
+  MINOR_OVERAGE
+  MAJOR_SHORTAGE
+  MAJOR_OVERAGE
+  CRITICAL_SHORTAGE
+  CRITICAL_OVERAGE
+}
+
+enum ApprovalStatus {
+  PENDING_REVIEW
+  SUBMITTED
+}
+
+enum FuelType {
+  PETROL
+  DIESEL
+}
+
+enum ImprestCategory {
+  TRANSPORT
+  MEALS
+  SUPPLIES
+  OTHER
+}
+
+enum ImprestStatus {
+  ISSUED
+  RETIRED
+  OVERDUE
+}

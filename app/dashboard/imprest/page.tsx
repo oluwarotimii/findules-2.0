@@ -1,0 +1,396 @@
+'use client'
+
+import { useState, useEffect } from 'react'
+import { useRouter } from 'next/navigation'
+import {
+    Wallet,
+    Plus,
+    Search,
+    Filter,
+    Calendar,
+    AlertCircle,
+    CheckCircle,
+    Clock,
+    Trash2,
+    Download
+} from 'lucide-react'
+
+interface Imprest {
+    imprestNo: string
+    staffName: string
+    amount: number
+    category: string
+    purpose: string
+    dateIssued: string
+    status: 'ISSUED' | 'RETIRED' | 'OVERDUE'
+    dateRetired?: string
+    amountSpent?: number
+    balance?: number
+    issuer: { name: string }
+    retirer?: { name: string }
+    branch: { branchName: string }
+}
+
+export default function ImprestPage() {
+    const router = useRouter()
+    const [imprest, setImprest] = useState<Imprest[]>([])
+    const [filteredImprest, setFilteredImprest] = useState<Imprest[]>([])
+    const [loading, setLoading] = useState(true)
+    const [activeTab, setActiveTab] = useState('ALL')
+    const [searchTerm, setSearchTerm] = useState('')
+
+    useEffect(() => {
+        fetchImprest()
+    }, [])
+
+    useEffect(() => {
+        filterImprest()
+    }, [imprest, activeTab, searchTerm])
+
+    const fetchImprest = async () => {
+        try {
+            const token = localStorage.getItem('token')
+            const res = await fetch('/api/imprest', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            })
+            if (res.ok) {
+                const data = await res.json()
+                setImprest(data)
+            }
+        } catch (error) {
+            console.error('Error fetching imprest:', error)
+        } finally {
+            setLoading(false)
+        }
+    }
+
+    const filterImprest = () => {
+        let filtered = imprest
+
+        // Filter by status tab
+        if (activeTab !== 'ALL') {
+            filtered = filtered.filter(i => i.status === activeTab)
+        }
+
+        // Filter by search term
+        if (searchTerm) {
+            filtered = filtered.filter(i =>
+                i.staffName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                i.imprestNo.toLowerCase().includes(searchTerm.toLowerCase())
+            )
+        }
+
+        setFilteredImprest(filtered)
+    }
+
+    const handleExport = async (format: 'csv' | 'excel') => {
+        try {
+            const token = localStorage.getItem('token')
+            const res = await fetch(`/api/export/imprest?format=${format}`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            })
+            if (res.ok) {
+                const blob = await res.blob()
+                const url = window.URL.createObjectURL(blob)
+                const a = document.createElement('a')
+                a.href = url
+                a.download = `imprest_${new Date().toISOString().split('T')[0]}.${format === 'csv' ? 'csv' : 'xlsx'}`
+                document.body.appendChild(a)
+                a.click()
+                document.body.removeChild(a)
+                window.URL.revokeObjectURL(url)
+            } else {
+                alert('Failed to export data')
+            }
+        } catch (error) {
+            console.error('Error exporting:', error)
+            alert('Failed to export data')
+        }
+    }
+
+    const handleDelete = async (imprestNo: string) => {
+        if (!confirm('Are you sure you want to delete this imprest?')) return
+
+        try {
+            const token = localStorage.getItem('token')
+            const res = await fetch(`/api/imprest/${imprestNo}`, {
+                method: 'DELETE',
+                headers: { 'Authorization': `Bearer ${token}` }
+            })
+
+            if (res.ok) {
+                fetchImprest()
+            } else {
+                const data = await res.json()
+                alert(data.error || 'Failed to delete imprest')
+            }
+        } catch (error) {
+            console.error('Error deleting imprest:', error)
+            alert('Failed to delete imprest')
+        }
+    }
+
+    const getStatusBadge = (status: string) => {
+        const badges = {
+            ISSUED: 'bg-blue-100 text-blue-800',
+            RETIRED: 'bg-green-100 text-green-800',
+            OVERDUE: 'bg-red-100 text-red-800'
+        }
+        return badges[status as keyof typeof badges] || 'bg-gray-100 text-gray-800'
+    }
+
+    const getStatusIcon = (status: string) => {
+        if (status === 'ISSUED') return <Clock className="w-4 h-4" />
+        if (status === 'RETIRED') return <CheckCircle className="w-4 h-4" />
+        if (status === 'OVERDUE') return <AlertCircle className="w-4 h-4" />
+        return null
+    }
+
+    const formatCurrency = (amount: number) => {
+        return new Intl.NumberFormat('en-NG', {
+            style: 'currency',
+            currency: 'NGN'
+        }).format(amount)
+    }
+
+    const calculateDaysOutstanding = (dateIssued: string) => {
+        const issued = new Date(dateIssued)
+        const now = new Date()
+        const diffTime = Math.abs(now.getTime() - issued.getTime())
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24))
+        return diffDays
+    }
+
+    // Calculate summary stats
+    const stats = {
+        outstanding: imprest.filter(i => i.status === 'ISSUED').length,
+        outstandingAmount: imprest.filter(i => i.status === 'ISSUED').reduce((sum, i) => sum + Number(i.amount), 0),
+        overdue: imprest.filter(i => i.status === 'OVERDUE').length,
+        retired: imprest.filter(i => i.status === 'RETIRED').length
+    }
+
+    if (loading) {
+        return (
+            <div className="flex items-center justify-center h-64">
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-600"></div>
+            </div>
+        )
+    }
+
+    return (
+        <div>
+            {/* Header */}
+            <div className="flex items-center justify-between mb-8">
+                <div>
+                    <h1 className="text-2xl font-bold text-gray-800 flex items-center">
+                        <Wallet className="w-8 h-8 mr-3 text-orange-600" />
+                        Imprest Management
+                    </h1>
+                    <p className="text-gray-500 text-sm mt-1">Track cash advances and retirements</p>
+                </div>
+                <div className="flex gap-2">
+                    <button onClick={() => handleExport('csv')} className="flex items-center px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50">
+                        <Download className="w-4 h-4 mr-2" />
+                        CSV
+                    </button>
+                    <button onClick={() => handleExport('excel')} className="flex items-center px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50">
+                        <Download className="w-4 h-4 mr-2" />
+                        Excel
+                    </button>
+                    <button
+                        onClick={() => router.push('/dashboard/imprest/issue')}
+                        className="flex items-center px-6 py-3 bg-orange-600 text-white rounded-lg font-semibold shadow-lg hover:bg-orange-700 transition-all transform hover:scale-105"
+                    >
+                        <Plus className="w-5 h-5 mr-2" />
+                        Issue Imprest
+                    </button>
+                </div>
+            </div>
+
+            {/* Summary Cards */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+                <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                    <div className="flex items-center justify-between">
+                        <div>
+                            <p className="text-gray-500 text-sm">Outstanding</p>
+                            <p className="text-3xl font-bold text-blue-600 mt-1">{stats.outstanding}</p>
+                        </div>
+                        <div className="p-3 bg-blue-100 rounded-lg">
+                            <Clock className="w-6 h-6 text-blue-600" />
+                        </div>
+                    </div>
+                </div>
+
+                <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                    <div className="flex items-center justify-between">
+                        <div>
+                            <p className="text-gray-500 text-sm">Total Amount</p>
+                            <p className="text-2xl font-bold text-gray-800 mt-1">
+                                ₦{stats.outstandingAmount.toLocaleString()}
+                            </p>
+                        </div>
+                        <div className="p-3 bg-orange-100 rounded-lg">
+                            <Wallet className="w-6 h-6 text-orange-600" />
+                        </div>
+                    </div>
+                </div>
+
+                <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                    <div className="flex items-center justify-between">
+                        <div>
+                            <p className="text-gray-500 text-sm">Overdue</p>
+                            <p className="text-3xl font-bold text-red-600 mt-1">{stats.overdue}</p>
+                        </div>
+                        <div className="p-3 bg-red-100 rounded-lg">
+                            <AlertCircle className="w-6 h-6 text-red-600" />
+                        </div>
+                    </div>
+                </div>
+
+                <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                    <div className="flex items-center justify-between">
+                        <div>
+                            <p className="text-gray-500 text-sm">Retired</p>
+                            <p className="text-3xl font-bold text-green-600 mt-1">{stats.retired}</p>
+                        </div>
+                        <div className="p-3 bg-green-100 rounded-lg">
+                            <CheckCircle className="w-6 h-6 text-green-600" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {/* Filters and Search */}
+            <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 mb-6">
+                {/* Status Tabs */}
+                <div className="flex flex-wrap gap-2 mb-4">
+                    {['ALL', 'ISSUED', 'RETIRED', 'OVERDUE'].map(tab => (
+                        <button
+                            key={tab}
+                            onClick={() => setActiveTab(tab)}
+                            className={`px-4 py-2 rounded-lg font-medium transition-colors ${activeTab === tab
+                                ? 'bg-orange-600 text-white'
+                                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                                }`}
+                        >
+                            {tab}
+                        </button>
+                    ))}
+                </div>
+
+                {/* Search */}
+                <div className="relative">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                    <input
+                        type="text"
+                        placeholder="Search by staff name or imprest number..."
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                    />
+                </div>
+            </div>
+
+            {/* Imprest List */}
+            <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+                {filteredImprest.length === 0 ? (
+                    <div className="text-center py-12">
+                        <Wallet className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+                        <p className="text-gray-500">No imprest records found</p>
+                    </div>
+                ) : (
+                    <div className="overflow-x-auto">
+                        <table className="w-full">
+                            <thead className="bg-gray-50 border-b border-gray-200">
+                                <tr>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Imprest No
+                                    </th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Staff Name
+                                    </th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Amount
+                                    </th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Category
+                                    </th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Date Issued
+                                    </th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Status
+                                    </th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Days
+                                    </th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                        Actions
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody className="bg-white divide-y divide-gray-200">
+                                {filteredImprest.map((item) => (
+                                    <tr key={item.imprestNo} className="hover:bg-gray-50">
+                                        <td className="px-6 py-4 whitespace-nowrap">
+                                            <span className="font-medium text-gray-900">{item.imprestNo}</span>
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap">
+                                            <span className="text-gray-900">{item.staffName}</span>
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap">
+                                            <span className="font-semibold text-gray-900">
+                                                {formatCurrency(item.amount)}
+                                            </span>
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap">
+                                            <span className="text-gray-600">{item.category}</span>
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap">
+                                            <span className="text-gray-600">
+                                                {new Date(item.dateIssued).toLocaleDateString()}
+                                            </span>
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap">
+                                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusBadge(item.status)}`}>
+                                                {getStatusIcon(item.status)}
+                                                <span className="ml-1">{item.status}</span>
+                                            </span>
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap">
+                                            {item.status !== 'RETIRED' && (
+                                                <span className={`text-sm ${calculateDaysOutstanding(item.dateIssued) > 30 ? 'text-red-600 font-semibold' : 'text-gray-600'}`}>
+                                                    {calculateDaysOutstanding(item.dateIssued)} days
+                                                </span>
+                                            )}
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap text-sm">
+                                            <div className="flex items-center gap-2">
+                                                {item.status === 'ISSUED' || item.status === 'OVERDUE' ? (
+                                                    <button
+                                                        onClick={() => router.push(`/dashboard/imprest/${item.imprestNo}/retire`)}
+                                                        className="px-3 py-1 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                                                    >
+                                                        Retire
+                                                    </button>
+                                                ) : null}
+                                                {item.status !== 'RETIRED' && (
+                                                    <button
+                                                        onClick={() => handleDelete(item.imprestNo)}
+                                                        className="p-1 text-red-600 hover:bg-red-50 rounded transition-colors"
+                                                    >
+                                                        <Trash2 className="w-4 h-4" />
+                                                    </button>
+                                                )}
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                )}
+            </div>
+        </div>
+    )
+}
