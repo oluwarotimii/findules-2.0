@@ -296,19 +296,19 @@ export default function ReconciliationsPage() {
 
             {/* Reconciliation Detail Modal */}
             {showModal && selectedRec && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-                    <div className="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+                <div className="fixed inset-0 bg-[color:var(--background)] bg-opacity-75 flex items-center justify-center z-50 p-4">
+                    <div className="bg-[color:var(--card)] rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto border border-[color:var(--border)] text-[color:var(--card-foreground)]">
                         {/* Modal Header */}
-                        <div className="flex items-center justify-between p-6 border-b border-gray-200">
+                        <div className="flex items-center justify-between p-6 border-b border-[color:var(--border)]">
                             <div>
-                                <h2 className="text-2xl font-bold text-gray-800">{selectedRec.serialNumber}</h2>
-                                <p className="text-sm text-gray-500 mt-1">{formatDate(selectedRec.date)}</p>
+                                <h2 className="text-2xl font-bold text-[color:var(--card-foreground)]">{selectedRec.serialNumber}</h2>
+                                <p className="text-sm text-[color:var(--muted-foreground)] mt-1">{formatDate(selectedRec.date)}</p>
                             </div>
                             <button
                                 onClick={() => { setShowModal(false); setSelectedRec(null); }}
-                                className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                                className="p-2 hover:bg-[color:var(--muted)/.2] rounded-lg transition-colors"
                             >
-                                <X className="w-5 h-5 text-gray-500" />
+                                <X className="w-5 h-5" />
                             </button>
                         </div>
 
@@ -316,29 +316,29 @@ export default function ReconciliationsPage() {
                         <div className="p-6 space-y-4">
                             {/* Cashier Info */}
                             <div>
-                                <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Cashier</label>
-                                <p className="text-lg font-medium text-gray-900">{selectedRec.cashierName}</p>
-                                <p className="text-sm text-gray-500">{selectedRec.branch.branchName}</p>
+                                <label className="text-xs font-semibold text-[color:var(--muted-foreground)] uppercase tracking-wide">Cashier</label>
+                                <p className="text-lg font-medium text-[color:var(--card-foreground)]">{selectedRec.cashierName}</p>
+                                <p className="text-sm text-[color:var(--muted-foreground)]">{selectedRec.branch.branchName}</p>
                             </div>
 
                             {/* Financial Summary */}
                             <div className="grid grid-cols-2 gap-4">
-                                <div className="p-4 bg-blue-50 rounded-lg">
-                                    <label className="text-xs font-semibold text-blue-600 uppercase tracking-wide">Total Sales</label>
-                                    <p className="text-xl font-bold text-blue-900">{formatCurrency(selectedRec.actualTotalSales)}</p>
+                                <div className="p-4 bg-[color:var(--primary)/.1] rounded-lg">
+                                    <label className="text-xs font-semibold text-[color:var(--primary)] uppercase tracking-wide">Total Sales</label>
+                                    <p className="text-xl font-bold text-[color:var(--primary)]">{formatCurrency(selectedRec.actualTotalSales)}</p>
                                 </div>
-                                <div className="p-4 bg-purple-50 rounded-lg">
-                                    <label className="text-xs font-semibold text-purple-600 uppercase tracking-wide">Closing Balance</label>
-                                    <p className="text-xl font-bold text-purple-900">{formatCurrency(selectedRec.actualClosingBalance)}</p>
+                                <div className="p-4 bg-[color:var(--secondary)/.1] rounded-lg">
+                                    <label className="text-xs font-semibold text-[color:var(--secondary)] uppercase tracking-wide">Closing Balance</label>
+                                    <p className="text-xl font-bold text-[color:var(--secondary)]">{formatCurrency(selectedRec.actualClosingBalance)}</p>
                                 </div>
                             </div>
 
                             {/* Variance */}
-                            <div className={`p-4 rounded-lg ${Math.abs(safeNum(selectedRec.overageShortage)) < 100 ? 'bg-green-50' :
-                                safeNum(selectedRec.overageShortage) < 0 ? 'bg-red-50' : 'bg-yellow-50'}`}>
+                            <div className={`p-4 rounded-lg ${Math.abs(safeNum(selectedRec.overageShortage)) < 100 ? 'bg-[color:var(--success)/.1]' :
+                                safeNum(selectedRec.overageShortage) < 0 ? 'bg-[color:var(--destructive)/.1]' : 'bg-[color:var(--warning)/.1]'}`}>
                                 <label className="text-xs font-semibold uppercase tracking-wide">Variance</label>
-                                <p className={`text-2xl font-bold ${Math.abs(safeNum(selectedRec.overageShortage)) < 100 ? 'text-green-700' :
-                                    safeNum(selectedRec.overageShortage) < 0 ? 'text-red-700' : 'text-yellow-700'}`}>
+                                <p className={`text-2xl font-bold ${Math.abs(safeNum(selectedRec.overageShortage)) < 100 ? 'text-[color:var(--success)]' :
+                                    safeNum(selectedRec.overageShortage) < 0 ? 'text-[color:var(--destructive)]' : 'text-[color:var(--warning)]'}`}>
                                     {safeNum(selectedRec.overageShortage) > 0 ? '+' : ''}{formatCurrency(selectedRec.overageShortage)}
                                 </p>
                                 <p className="text-sm mt-1 font-medium">
@@ -349,20 +349,20 @@ export default function ReconciliationsPage() {
 
                             {/* Status */}
                             <div>
-                                <label className="text-xs font-semibold text-gray-500 uppercase tracking-wide">Current Status</label>
+                                <label className="text-xs font-semibold text-[color:var(--muted-foreground)] uppercase tracking-wide">Current Status</label>
                                 <div className="mt-2">
                                     {selectedRec.status === 'RETIRED' ? (
-                                        <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-gray-100 text-gray-700">
+                                        <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-[color:var(--muted)/.2] text-[color:var(--muted-foreground)]">
                                             <Archive className="w-4 h-4 mr-1" />
                                             Retired (Reviewed)
                                         </span>
                                     ) : Math.abs(safeNum(selectedRec.overageShortage)) < 100 ? (
-                                        <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-green-100 text-green-700">
+                                        <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-[color:var(--success)/.2] text-[color:var(--success)]">
                                             <CheckCircle className="w-4 h-4 mr-1" />
                                             Balanced
                                         </span>
                                     ) : (
-                                        <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-red-100 text-red-700">
+                                        <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-[color:var(--destructive)/.2] text-[color:var(--destructive)]">
                                             <AlertCircle className="w-4 h-4 mr-1" />
                                             Needs Review
                                         </span>
@@ -372,10 +372,10 @@ export default function ReconciliationsPage() {
                         </div>
 
                         {/* Modal Footer */}
-                        <div className="flex items-center justify-end gap-3 p-6 border-t border-gray-200 bg-gray-50">
+                        <div className="flex items-center justify-end gap-3 p-6 border-t border-[color:var(--border)] bg-[color:var(--muted)/.1]">
                             <button
                                 onClick={() => { setShowModal(false); setSelectedRec(null); }}
-                                className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-100 transition-colors"
+                                className="px-4 py-2 border border-[color:var(--border)] text-[color:var(--card-foreground)] rounded-lg hover:bg-[color:var(--muted)/.2] transition-colors"
                             >
                                 Close
                             </button>
@@ -383,11 +383,11 @@ export default function ReconciliationsPage() {
                                 <button
                                     onClick={handleRetire}
                                     disabled={retiring}
-                                    className="flex items-center px-4 py-2 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors disabled:opacity-50"
+                                    className="flex items-center px-4 py-2 bg-[color:var(--accent)] text-[color:var(--accent-foreground)] rounded-lg hover:bg-[color:var(--accent)/.9] transition-colors disabled:opacity-50"
                                 >
                                     {retiring ? (
                                         <>
-                                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-[color:var(--accent-foreground)] mr-2"></div>
                                             Retiring...
                                         </>
                                     ) : (

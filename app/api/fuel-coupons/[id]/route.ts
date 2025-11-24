@@ -231,12 +231,7 @@ async function generatePdf(documentCode: string, user: any) {
     doc.setFont('helvetica', 'normal')
     doc.text('Valid for issue date', 74, yPos, { align: 'center' })
 
-    // Footer - minimal
-    doc.setFontSize(5)
-    doc.setFont('helvetica', 'italic')
-    doc.text(`Generated: ${new Date().toLocaleDateString()}`, 74, 198, { align: 'center' })
-
-    // Convert to buffer
+    // Convert to buffer (removed the generated on text)
     const pdfBuffer = Buffer.from(doc.output('arraybuffer'))
 
     // Update PDF generated flag

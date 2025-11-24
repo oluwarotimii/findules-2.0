@@ -213,7 +213,7 @@ export default function DashboardPage() {
                     </Link>
 
                     <Link
-                        href="/dashboard/fuel"
+                        href="/dashboard/fuel-coupons/create"
                         className="flex flex-col items-center p-4 bg-[color:var(--warning)/.1] hover:bg-[color:var(--warning)/.2] rounded-lg transition-colors group"
                     >
                         <div className="mb-2 text-[color:var(--warning)] group-hover:scale-110 transition-transform">
@@ -223,7 +223,7 @@ export default function DashboardPage() {
                     </Link>
 
                     <Link
-                        href="/dashboard/imprest"
+                        href="/dashboard/imprest/issue"
                         className="flex flex-col items-center p-4 bg-[color:var(--accent)/.1] hover:bg-[color:var(--accent)/.2] rounded-lg transition-colors group"
                     >
                         <div className="mb-2 text-[color:var(--accent)] group-hover:scale-110 transition-transform">

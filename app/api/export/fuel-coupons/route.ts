@@ -64,7 +64,8 @@ export async function GET(request: NextRequest) {
 
         if (format === 'excel') {
             const buffer = convertToExcel(exportData, 'Fuel Coupons')
-            return new NextResponse(buffer, {
+            const uint8Array = new Uint8Array(buffer)
+            return new NextResponse(uint8Array, {
                 headers: {
                     'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
                     'Content-Disposition': `attachment; filename="fuel_coupons_${new Date().toISOString().split('T')[0]}.xlsx"`

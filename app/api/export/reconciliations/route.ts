@@ -60,7 +60,8 @@ export async function GET(request: NextRequest) {
 
         if (format === 'excel') {
             const buffer = convertToExcel(exportData, 'Reconciliations')
-            return new NextResponse(buffer, {
+            const uint8Array = new Uint8Array(buffer)
+            return new NextResponse(uint8Array, {
                 headers: {
                     'Content-Type': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
                     'Content-Disposition': `attachment; filename="reconciliations_${new Date().toISOString().split('T')[0]}.xlsx"`

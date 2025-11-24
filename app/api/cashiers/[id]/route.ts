@@ -5,7 +5,7 @@ import { verifyToken } from '@/lib/auth'
 // DELETE: Deactivate cashier
 export async function DELETE(
     request: NextRequest,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
         const token = request.headers.get('Authorization')?.split(' ')[1]
@@ -18,7 +18,7 @@ export async function DELETE(
             return NextResponse.json({ error: 'Unauthorized. Managers only.' }, { status: 403 })
         }
 
-        const { id } = params
+        const { id } = await params
 
         // Check if cashier exists
         const cashier = await prisma.cashier.findUnique({

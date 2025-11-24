@@ -87,14 +87,15 @@ export default function DashboardLayout({
 
     const navigation = [
         { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard, roles: ['STAFF', 'MANAGER'] },
-        { name: 'Cash Requisitions', href: '/dashboard/requisitions', icon: Banknote, roles: ['STAFF', 'MANAGER'] },
+        // { name: 'Cash Requisitions', href: '/dashboard/requisitions', icon: Banknote, roles: ['STAFF', 'MANAGER'] },
         { name: 'Reconciliations', href: '/dashboard/reconciliations', icon: ClipboardCheck, roles: ['STAFF', 'MANAGER'] },
         { name: 'Fuel Coupons', href: '/dashboard/fuel-coupons', icon: Fuel, roles: ['STAFF', 'MANAGER'] },
         { name: 'Imprest', href: '/dashboard/imprest', icon: Wallet, roles: ['STAFF', 'MANAGER'] },
         { name: 'Cashiers', href: '/dashboard/cashiers', icon: Users, roles: ['MANAGER'] },
         { name: 'Branches', href: '/dashboard/branches', icon: Building, roles: ['MANAGER'] },
         { name: 'Reports', href: '/dashboard/reports', icon: BarChart3, roles: ['MANAGER'] },
-        { name: 'Users', href: '/dashboard/users', icon: UserCog, roles: ['MANAGER'] },
+        { name: 'Audit Logs', href: '/dashboard/audit-logs', icon: BarChart3, roles: ['MANAGER'] },
+        // { name: 'Users', href: '/dashboard/users', icon: UserCog, roles: ['MANAGER'] },
         { name: 'Settings', href: '/dashboard/settings', icon: Settings, roles: ['MANAGER'] },
     ]
 
