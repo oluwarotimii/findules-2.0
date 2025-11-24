@@ -25,32 +25,33 @@ export default function CreateReconciliationPage() {
         date: new Date().toISOString().split('T')[0],
         cashierId: '',
 
-        // Opening
-        expectedOpeningBalance: '',
+        // Opening (auto-fetched from previous day)
         actualOpeningBalance: '',
-        openingVarianceExplanation: '',
 
-        // Sales
-        expectedTotalSales: '',
+        // Sales (from Busy Accounting Software)
+        totalSales: '',
+
+        // Cashier Record Breakdown (all recorded in cashier's book)
         posTransactionsAmount: '',
-        cashSales: '',
-
-        // Adjustments
+        cashTransaction: '', // New field
+        transfersIn: '',
+        transfersOut: '',
         discountsGiven: '',
         refundsIssued: '',
 
-        // Outflows
+        // Withdrawals
         cashWithdrawn: '',
-        transfersOut: '',
+        withdrawalRecipient: '',
+        withdrawalDetails: '',
+
+        // Physical Count
+        cashAtHand: '',
 
         // Bank Deposit
         tellerNo: '',
         bankName: '',
         branchLocation: '',
         depositSlipNo: '',
-
-        // Closing
-        actualClosingBalance: '',
 
         // Remarks
         remarks: '',
@@ -60,6 +61,7 @@ export default function CreateReconciliationPage() {
     const [calculations, setCalculations] = useState({
         openingVariance: 0,
         actualTotalSales: 0,
+        turnover: 0,
         expectedClosingBalance: 0,
         overageShortage: 0
     })
@@ -112,17 +114,17 @@ export default function CreateReconciliationPage() {
                     const data = await res.json()
                     setPreviousBalance(data)
 
-                    // Auto-populate expected opening balance if previous balance exists
+                    // Auto-populate actual opening balance if previous balance exists
                     if (data.hasHistory && data.previousClosingBalance !== null) {
                         setFormData(prev => ({
                             ...prev,
-                            expectedOpeningBalance: data.previousClosingBalance
+                            actualOpeningBalance: String(data.previousClosingBalance)
                         }))
                     } else {
-                        // Reset to 0 if no previous balance
+                        // Reset to empty if no previous balance
                         setFormData(prev => ({
                             ...prev,
-                            expectedOpeningBalance: 0
+                            actualOpeningBalance: ''
                         }))
                     }
                 }
@@ -151,31 +153,46 @@ export default function CreateReconciliationPage() {
     // Auto-Calculations
     useEffect(() => {
         const {
-            expectedOpeningBalance,
             actualOpeningBalance,
+            totalSales,
             posTransactionsAmount,
-            cashSales,
-            cashWithdrawn,
+            cashTransaction,
+            transfersIn,
             transfersOut,
-            actualClosingBalance
+            discountsGiven,
+            refundsIssued,
+            cashWithdrawn,
+            cashAtHand
         } = formData
 
-        // 1. Opening Variance
-        const openingVariance = actualOpeningBalance - expectedOpeningBalance
+        // Helper to safely parse numbers
+        const parseNum = (val: string | number): number => {
+            if (typeof val === 'number') return val
+            const parsed = parseFloat(val)
+            return isNaN(parsed) ? 0 : parsed
+        }
 
-        // 2. Actual Total Sales
-        const actualTotalSales = cashSales + posTransactionsAmount
+        // 1. Turnover = Opening Balance + Total Sales
+        const turnover = parseNum(actualOpeningBalance) + parseNum(totalSales)
 
-        // 3. Expected Closing Balance
-        // Formula: Actual Opening + Cash Sales - Cash Withdrawn - Transfers Out
-        const expectedClosingBalance = actualOpeningBalance + cashSales - cashWithdrawn - transfersOut
+        // 2. Expected Closing Balance = Turnover - ALL Cashier Record Breakdown Items - Withdrawals
+        // Cashier Record Breakdown: POS, Transfers In, Transfers Out, Discounts, Refunds (ALL subtracted)
+        const expectedClosingBalance = turnover
+            - parseNum(posTransactionsAmount)
+            - parseNum(transfersIn)
+            - parseNum(transfersOut)
+            - parseNum(discountsGiven)
+            - parseNum(refundsIssued)
+            - parseNum(cashWithdrawn)
+        // cashTransaction is EXCLUDED from deductions as per requirement
 
-        // 4. Overage/Shortage
-        const overageShortage = actualClosingBalance - expectedClosingBalance
+        // 3. Variance = Cash at Hand - Expected Closing
+        const overageShortage = parseNum(cashAtHand) - expectedClosingBalance
 
         setCalculations({
-            openingVariance,
-            actualTotalSales,
+            openingVariance: 0, // No longer used
+            actualTotalSales: parseNum(totalSales), // For display
+            turnover,
             expectedClosingBalance,
             overageShortage
         })
@@ -303,7 +320,7 @@ export default function CreateReconciliationPage() {
                         <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-lg flex items-center text-green-700 text-sm">
                             <Info className="w-4 h-4 mr-2 flex-shrink-0" />
                             <span>
-                                Expected opening balance auto-filled from previous reconciliation (
+                                Opening balance auto-filled from previous reconciliation (
                                 <strong>{previousBalance.previousSerialNumber}</strong> on{' '}
                                 <strong>{new Date(previousBalance.previousDate!).toLocaleDateString()}</strong>
                                 )
@@ -318,18 +335,19 @@ export default function CreateReconciliationPage() {
                         </div>
                     )}
 
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">
-                                Expected Opening (₦)
+                                Opening Balance (₦)
                                 {previousBalance?.hasHistory && (
                                     <span className="ml-1 text-xs text-green-600">(Auto-filled)</span>
                                 )}
                             </label>
+                            <p className="text-xs text-gray-500 mb-2">From previous day's closing balance</p>
                             <input
                                 type="number"
-                                name="expectedOpeningBalance"
-                                value={formData.expectedOpeningBalance}
+                                name="actualOpeningBalance"
+                                value={formData.actualOpeningBalance}
                                 onChange={handleChange}
                                 className={`w-full p-2 text-gray-900 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ${previousBalance?.hasHistory
                                     ? 'border-green-300 bg-green-50'
@@ -337,62 +355,53 @@ export default function CreateReconciliationPage() {
                                     }`}
                                 min="0"
                                 step="0.01"
-                            />
-                        </div>
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Actual Opening (₦)</label>
-                            <input
-                                type="number"
-                                name="actualOpeningBalance"
-                                value={formData.actualOpeningBalance}
-                                onChange={handleChange}
-                                className="w-full p-2 text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                min="0"
-                                step="0.01"
-                            />
-                        </div>
-                        <div className={`p-4 rounded-lg ${calculations.openingVariance === 0 ? 'bg-green-50 text-green-700' : 'bg-red-50 text-red-700'}`}>
-                            <label className="block text-xs font-semibold uppercase tracking-wide mb-1">Opening Variance</label>
-                            <p className="text-xl font-bold">{formatCurrency(calculations.openingVariance)}</p>
-                        </div>
-                    </div>
-                    {calculations.openingVariance !== 0 && (
-                        <div className="mt-4">
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Variance Explanation</label>
-                            <textarea
-                                name="openingVarianceExplanation"
-                                value={formData.openingVarianceExplanation}
-                                onChange={handleChange}
-                                className="w-full p-2 text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                                rows={2}
-                                placeholder="Explain why the opening balance differs from expected..."
+                                placeholder="0.00"
                                 required
                             />
                         </div>
-                    )}
+                    </div>
                 </section>
 
-                {/* 3. Sales & Revenue */}
+                {/* 3. Sales & Turnover */}
                 <section className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
                     <h2 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
                         <Banknote className="w-5 h-5 mr-2 text-blue-600" />
-                        Sales & Revenue
+                        Sales & Turnover
                     </h2>
+
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Cash Sales (₦)</label>
-                            <p className="text-xs text-gray-500 mb-2">Total cash sales for the day</p>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Total Sales (₦)</label>
+                            <p className="text-xs text-gray-500 mb-2">From Busy Accounting Software</p>
                             <input
                                 type="number"
-                                name="cashSales"
-                                value={formData.cashSales}
+                                name="totalSales"
+                                value={formData.totalSales}
                                 onChange={handleChange}
                                 className="w-full p-2 text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                                 min="0"
                                 step="0.01"
                                 placeholder="0.00"
+                                required
                             />
                         </div>
+                        <div className="p-4 bg-purple-50 text-purple-700 rounded-lg">
+                            <label className="block text-xs font-semibold uppercase tracking-wide mb-1">Turnover (Calc)</label>
+                            <p className="text-xl font-bold">{formatCurrency(calculations.turnover)}</p>
+                            <p className="text-xs mt-1 opacity-75">Opening Balance + Total Sales</p>
+                        </div>
+                    </div>
+                </section>
+
+                {/* 4. Cashier Record Breakdown */}
+                <section className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                    <h2 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                        <Calculator className="w-5 h-5 mr-2 text-indigo-600" />
+                        Cashier Record Breakdown
+                    </h2>
+                    <p className="text-sm text-gray-600 mb-4">All items recorded in the cashier's book (all subtracted from turnover)</p>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">POS Transactions (₦)</label>
                             <p className="text-xs text-gray-500 mb-2">Total POS/card transactions</p>
@@ -407,48 +416,43 @@ export default function CreateReconciliationPage() {
                                 placeholder="0.00"
                             />
                         </div>
-                    </div>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Expected Total Sales (System) (₦)</label>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Cash Transaction (₦)</label>
+                            <p className="text-xs text-gray-500 mb-2">Cash transactions (Not deducted from turnover)</p>
                             <input
                                 type="number"
-                                name="expectedTotalSales"
-                                value={formData.expectedTotalSales}
+                                name="cashTransaction"
+                                value={formData.cashTransaction}
                                 onChange={handleChange}
                                 className="w-full p-2 text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                                 min="0"
                                 step="0.01"
+                                placeholder="0.00"
                             />
                         </div>
-                        <div className="p-4 bg-blue-50 text-blue-700 rounded-lg">
-                            <label className="block text-xs font-semibold uppercase tracking-wide mb-1">Actual Total Sales (Calc)</label>
-                            <p className="text-xl font-bold">{formatCurrency(calculations.actualTotalSales)}</p>
-                        </div>
                     </div>
-                </section>
 
-                {/* 4. Cash Outflows */}
-                <section className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-                    <h2 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
-                        <ArrowUpRight className="w-5 h-5 mr-2 text-red-600" />
-                        Cash Outflows
-                    </h2>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Cash Withdrawn / Expenses (₦)</label>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Transfers In (₦)</label>
+                            <p className="text-xs text-gray-500 mb-2">Money received from other accounts</p>
                             <input
                                 type="number"
-                                name="cashWithdrawn"
-                                value={formData.cashWithdrawn}
+                                name="transfersIn"
+                                value={formData.transfersIn}
                                 onChange={handleChange}
                                 className="w-full p-2 text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                                 min="0"
                                 step="0.01"
+                                placeholder="0.00"
                             />
                         </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">Transfers Out (₦)</label>
+                            <p className="text-xs text-gray-500 mb-2">Money transferred out to other accounts</p>
                             <input
                                 type="number"
                                 name="transfersOut"
@@ -457,12 +461,99 @@ export default function CreateReconciliationPage() {
                                 className="w-full p-2 text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                                 min="0"
                                 step="0.01"
+                                placeholder="0.00"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Discounts Given (₦)</label>
+                            <p className="text-xs text-gray-500 mb-2">Total discounts provided to customers</p>
+                            <input
+                                type="number"
+                                name="discountsGiven"
+                                value={formData.discountsGiven}
+                                onChange={handleChange}
+                                className="w-full p-2 text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                min="0"
+                                step="0.01"
+                                placeholder="0.00"
+                            />
+                        </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Refunds Issued (₦)</label>
+                            <p className="text-xs text-gray-500 mb-2">Total refunds given to customers</p>
+                            <input
+                                type="number"
+                                name="refundsIssued"
+                                value={formData.refundsIssued}
+                                onChange={handleChange}
+                                className="w-full p-2 text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                min="0"
+                                step="0.01"
+                                placeholder="0.00"
                             />
                         </div>
                     </div>
                 </section>
 
-                {/* 5. Bank Deposit */}
+                {/* 5. Withdrawals & Expenses */}
+                <section className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                    <h2 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                        <ArrowUpRight className="w-5 h-5 mr-2 text-red-600" />
+                        Withdrawals & Expenses
+                    </h2>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Cash Withdrawn / Expenses (₦)</label>
+                            <p className="text-xs text-gray-500 mb-2">Cash withdrawn or expenses paid</p>
+                            <input
+                                type="number"
+                                name="cashWithdrawn"
+                                value={formData.cashWithdrawn}
+                                onChange={handleChange}
+                                className="w-full p-2 text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                min="0"
+                                step="0.01"
+                                placeholder="0.00"
+                            />
+                        </div>
+                    </div>
+
+                    {/* Withdrawal Details - Show when cash withdrawn > 0 */}
+                    {parseFloat(formData.cashWithdrawn || '0') > 0 && (
+                        <div className="mt-4 space-y-4">
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Recipient Name</label>
+                                <p className="text-xs text-gray-500 mb-2">Name of person who collected the cash</p>
+                                <input
+                                    type="text"
+                                    name="withdrawalRecipient"
+                                    value={formData.withdrawalRecipient}
+                                    onChange={handleChange}
+                                    className="w-full p-2 text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                    placeholder="Enter recipient's full name"
+                                />
+                            </div>
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-1">Withdrawal Details</label>
+                                <p className="text-xs text-gray-500 mb-2">Provide details about withdrawals and expenses</p>
+                                <textarea
+                                    name="withdrawalDetails"
+                                    value={formData.withdrawalDetails}
+                                    onChange={handleChange}
+                                    className="w-full p-2 text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                    rows={3}
+                                    placeholder="Describe the purpose of withdrawals or expenses..."
+                                />
+                            </div>
+                        </div>
+                    )}
+                </section>
+
+                {/* 6. Bank Deposit */}
                 <section className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
                     <h2 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
                         <CreditCard className="w-5 h-5 mr-2 text-purple-600" />
@@ -493,8 +584,6 @@ export default function CreateReconciliationPage() {
                     </div>
                 </section>
 
-
-
                 {/* 7. Closing & Variance */}
                 <section className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
                     <h2 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
@@ -505,17 +594,21 @@ export default function CreateReconciliationPage() {
                         <div className="p-4 bg-gray-50 rounded-lg">
                             <label className="block text-xs font-semibold uppercase tracking-wide mb-1 text-gray-500">Expected Closing</label>
                             <p className="text-xl font-bold text-gray-800">{formatCurrency(calculations.expectedClosingBalance)}</p>
+                            <p className="text-xs mt-1 text-gray-600">Turnover - All Deductions</p>
                         </div>
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Actual Closing Balance (₦)</label>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Cash at Hand (₦)</label>
+                            <p className="text-xs text-gray-500 mb-2">Physical cash count</p>
                             <input
                                 type="number"
-                                name="actualClosingBalance"
-                                value={formData.actualClosingBalance}
+                                name="cashAtHand"
+                                value={formData.cashAtHand}
                                 onChange={handleChange}
                                 className="w-full p-2 text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                                 min="0"
                                 step="0.01"
+                                placeholder="0.00"
+                                required
                             />
                         </div>
                         <div className={`p-4 rounded-lg ${Math.abs(calculations.overageShortage) < 100 ? 'bg-green-100 text-green-800' :

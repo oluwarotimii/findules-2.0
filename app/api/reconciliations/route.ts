@@ -114,36 +114,36 @@ export async function POST(request: NextRequest) {
         // Parse numeric fields to ensure they are valid decimals
         const parseDecimal = (val: any) => new Prisma.Decimal(val || 0)
 
-        const expectedOpeningBalance = parseDecimal(body.expectedOpeningBalance)
         const actualOpeningBalance = parseDecimal(body.actualOpeningBalance)
-        const openingVariance = actualOpeningBalance.sub(expectedOpeningBalance)
+        const totalSales = parseDecimal(body.totalSales) // Stored in actualTotalSales
 
-        const cashSales = parseDecimal(body.cashSales)
+        // Cashier Record Breakdown Items
         const posTransactionsAmount = parseDecimal(body.posTransactionsAmount)
-        const actualTotalSales = cashSales.add(posTransactionsAmount)
-
-        // Note: expectedTotalSales is usually provided or calculated from system records. 
-        // Here we take it from input, but in a real system it might come from a sales API.
-        const expectedTotalSales = parseDecimal(body.expectedTotalSales)
-
-        const cashWithdrawn = parseDecimal(body.cashWithdrawn)
+        const transfersIn = parseDecimal(body.transfersIn)
         const transfersOut = parseDecimal(body.transfersOut)
         const discountsGiven = parseDecimal(body.discountsGiven)
         const refundsIssued = parseDecimal(body.refundsIssued)
 
-        const actualClosingBalance = parseDecimal(body.actualClosingBalance)
+        // Withdrawals
+        const cashWithdrawn = parseDecimal(body.cashWithdrawn)
 
-        // Calculate Expected Closing Balance
-        // Formula: Actual Opening + Cash Sales - Cash Withdrawn - Transfers Out
-        // (POS sales go to bank, so they don't affect cash in hand closing balance, 
-        // unless 'actualTotalSales' implies all cash. Assuming 'cashSales' is the cash component)
-        const expectedClosingBalance = actualOpeningBalance
-            .add(cashSales)
-            .sub(cashWithdrawn)
+        // Physical Count
+        const cashAtHand = parseDecimal(body.cashAtHand) // Stored in actualClosingBalance
+
+        // 1. Turnover = Opening Balance + Total Sales
+        const turnover = actualOpeningBalance.add(totalSales)
+
+        // 2. Expected Closing Balance = Turnover - ALL Cashier Record Breakdown Items - Withdrawals
+        const expectedClosingBalance = turnover
+            .sub(posTransactionsAmount)
+            .sub(transfersIn)
             .sub(transfersOut)
+            .sub(discountsGiven)
+            .sub(refundsIssued)
+            .sub(cashWithdrawn)
 
-        // Calculate Overage/Shortage
-        const overageShortage = actualClosingBalance.sub(expectedClosingBalance)
+        // 3. Variance = Cash at Hand - Expected Closing
+        const overageShortage = cashAtHand.sub(expectedClosingBalance)
 
         // Determine Variance Category
         const varianceCategory = calculateVarianceCategory(overageShortage.toNumber()) as VarianceCategory
@@ -154,45 +154,44 @@ export async function POST(request: NextRequest) {
                 date: new Date(body.date),
                 cashierId: cashier.id,
                 cashierName: cashier.name,
-                branchId: cashier.branchId, // Use cashier's branch
+                branchId: cashier.branchId,
 
-                expectedOpeningBalance,
                 actualOpeningBalance,
-                openingVariance,
-                openingVarianceExplanation: body.openingVarianceExplanation,
 
-                expectedTotalSales,
-                actualTotalSales,
+                // Sales
+                actualTotalSales: totalSales, // Storing totalSales here
+
+                // Breakdown
                 posTransactionsAmount,
-                cashSales,
-
+                transfersIn,
+                transfersOut,
                 discountsGiven,
                 refundsIssued,
 
-                turnOver: actualTotalSales, // Assuming turnover is total sales
+                turnOver: turnover,
+
+                // Withdrawals
                 cashWithdrawn,
+                withdrawalRecipient: body.withdrawalRecipient,
                 withdrawalDetails: body.withdrawalDetails,
 
+                // Bank Deposit
                 tellerNo: body.tellerNo,
                 bankName: body.bankName,
                 branchLocation: body.branchLocation,
                 depositSlipNo: body.depositSlipNo,
                 depositSlipUpload: body.depositSlipUpload,
 
-                transfersOut,
-                transferDetails: body.transferDetails,
-
+                // Closing
                 expectedClosingBalance,
-                actualClosingBalance,
+                actualClosingBalance: cashAtHand, // Storing cashAtHand here
 
                 overageShortage,
                 varianceCategory,
 
-
                 remarks: body.remarks,
 
-                submittedBy: user.userId, // The Accountant/User who submitted it
-                // Audit
+                submittedBy: user.userId,
                 createdByIp: request.headers.get('x-forwarded-for') || 'unknown',
             }
         })

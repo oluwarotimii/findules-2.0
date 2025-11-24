@@ -85,30 +85,29 @@ model Reconciliation {
   cashierId                  String            @db.VarChar(50)
   cashierName                String            @db.VarChar(100)
   branchId                   String            @db.VarChar(20)
-  expectedOpeningBalance     Decimal           @default(0.00) @db.Decimal(15, 2)
   actualOpeningBalance       Decimal           @default(0.00) @db.Decimal(15, 2)
-  openingVariance            Decimal           @default(0.00) @db.Decimal(15, 2)
-  openingVarianceExplanation String?           @db.Text
-  expectedTotalSales         Decimal           @default(0.00) @db.Decimal(15, 2)
   actualTotalSales           Decimal           @default(0.00) @db.Decimal(15, 2)
   posTransactionsAmount      Decimal           @default(0.00) @db.Decimal(15, 2)
-  cashSales                  Decimal           @default(0.00) @db.Decimal(15, 2)
+  cashTransaction            Decimal           @default(0.00) @db.Decimal(15, 2)
   discountsGiven             Decimal           @default(0.00) @db.Decimal(15, 2)
   refundsIssued              Decimal           @default(0.00) @db.Decimal(15, 2)
   turnOver                   Decimal           @default(0.00) @db.Decimal(15, 2)
   cashWithdrawn              Decimal           @default(0.00) @db.Decimal(15, 2)
+  withdrawalRecipient        String?           @db.VarChar(100)
   withdrawalDetails          String?           @db.LongText
+  transfersIn                Decimal           @default(0.00) @db.Decimal(15, 2)
+  transfersOut               Decimal           @default(0.00) @db.Decimal(15, 2)
+  transferDetails            String?           @db.LongText
   tellerNo                   String?           @db.VarChar(20)
   bankName                   String?           @db.VarChar(100)
   branchLocation             String?           @db.VarChar(100)
   depositSlipNo              String?           @db.VarChar(50)
   depositSlipUpload          String?           @db.VarChar(255)
-  transfersOut               Decimal           @default(0.00) @db.Decimal(15, 2)
-  transferDetails            String?           @db.LongText
   expectedClosingBalance     Decimal           @default(0.00) @db.Decimal(15, 2)
   actualClosingBalance       Decimal           @default(0.00) @db.Decimal(15, 2)
   overageShortage            Decimal           @default(0.00) @db.Decimal(15, 2)
-  varianceCategory           VarianceCategory?
+  varianceCategory           VarianceCategory
+  status                     ReconciliationStatus @default(ACTIVE)
   remarks                    String?           @db.Text
   cashierSignature           String?           @db.VarChar(255)
   supervisorName             String?           @db.VarChar(100)
@@ -128,6 +127,7 @@ model Reconciliation {
   @@index([cashierId, date])
   @@index([date])
   @@index([varianceCategory])
+  @@index([status])
   @@map("reconciliations")
 }
 
@@ -292,4 +292,9 @@ enum ImprestStatus {
   ISSUED
   RETIRED
   OVERDUE
+}
+
+enum ReconciliationStatus {
+  ACTIVE
+  RETIRED
 }
