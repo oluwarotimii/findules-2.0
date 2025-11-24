@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { verifyToken } from '@/lib/auth'
 import { generateFuelCouponCode } from '@/lib/utils'
-import { FuelType } from '@prisma/client'
 
 // GET: List fuel coupons
 export async function GET(request: NextRequest) {
@@ -138,7 +137,7 @@ export async function POST(request: NextRequest) {
                 vehicleType: body.vehicleType,
                 plateNumber: body.plateNumber,
                 purpose: body.purpose,
-                fuelType: body.fuelType as FuelType,
+                fuelType: body.fuelType,
                 quantityLitres: body.quantityLitres,
                 estimatedAmount: body.estimatedAmount || 0,
                 createdBy: user.userId,
