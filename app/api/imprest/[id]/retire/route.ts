@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { verifyToken } from '@/lib/auth'
-import { Prisma } from '@prisma/client'
 
 export async function POST(
     request: NextRequest,
@@ -46,18 +45,18 @@ export async function POST(
             )
         }
 
-        const amountSpent = new Prisma.Decimal(body.amountSpent)
-        const amount = new Prisma.Decimal(imprest.amount)
+        const amountSpent = Number(body.amountSpent)
+        const amount = Number(imprest.amount)
 
         // Validate amount spent
-        if (amountSpent.lessThan(0)) {
+        if (amountSpent < 0) {
             return NextResponse.json(
                 { error: 'Amount spent cannot be negative' },
                 { status: 400 }
             )
         }
 
-        if (amountSpent.greaterThan(amount)) {
+        if (amountSpent > amount) {
             return NextResponse.json(
                 { error: 'Amount spent cannot exceed amount issued' },
                 { status: 400 }
@@ -65,7 +64,7 @@ export async function POST(
         }
 
         // Calculate balance
-        const balance = amount.sub(amountSpent)
+        const balance = amount - amountSpent
 
         // Update imprest
         const updatedImprest = await prisma.imprest.update({
