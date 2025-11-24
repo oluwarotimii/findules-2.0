@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { verifyToken } from '@/lib/auth'
 import { convertToCSV, convertToExcel, formatDateForExport, formatCurrencyForExport } from '@/lib/export-utils'
-import { Reconciliation } from '@prisma/client'
+import { Prisma } from '@prisma/client'
 
 export async function GET(request: NextRequest) {
     try {
@@ -44,7 +44,7 @@ export async function GET(request: NextRequest) {
         })
 
         // Format data for export
-        const exportData = reconciliations.map((r: Reconciliation & { cashier: { name: string }, branch: { branchName: string } }) => ({
+        const exportData = reconciliations.map((r: any) => ({
             'Serial Number': r.serialNumber,
             'Date': formatDateForExport(r.date),
             'Cashier': r.cashierName,
