@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { verifyToken } from '@/lib/auth'
 import { convertToCSV, convertToExcel, formatDateForExport, formatCurrencyForExport } from '@/lib/export-utils'
+import { FuelCoupon } from '@prisma/client'
 
 export async function GET(request: NextRequest) {
     try {
@@ -46,7 +47,7 @@ export async function GET(request: NextRequest) {
             orderBy: { date: 'desc' }
         })
 
-        const exportData = fuelCoupons.map((fc) => ({
+        const exportData = fuelCoupons.map((fc: FuelCoupon & { creator: { name: string }, branch: { branchName: string } }) => ({
             'Document Code': fc.documentCode,
             'Date': formatDateForExport(fc.date),
             'Staff Name': fc.staffName,
