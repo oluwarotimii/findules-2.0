@@ -46,7 +46,7 @@ export async function GET(request: NextRequest) {
             orderBy: { date: 'desc' }
         })
 
-        const exportData = fuelCoupons.map(fc => ({
+        const exportData = fuelCoupons.map((fc) => ({
             'Document Code': fc.documentCode,
             'Date': formatDateForExport(fc.date),
             'Staff Name': fc.staffName,
