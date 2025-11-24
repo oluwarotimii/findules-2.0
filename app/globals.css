@@ -4,26 +4,163 @@
   --background: #ffffff;
   --foreground: #171717;
 
-  /* New Color Palette */
+  /* Brand Color Palette with Better Contrast */
   --teal: #177e89;
+  --teal-foreground: #ffffff;
   --dark-teal: #084c61;
+  --dark-teal-foreground: #ffffff;
   --scarlet-rush: #db3a34;
-  --golden-pollen: #ffc857;
+  --scarlet-rush-foreground: #ffffff;
+  --golden-pollen: #e6b448; /* Adjusted for better contrast */
+  --golden-pollen-foreground: #000000;
   --graphite: #323031;
+  --graphite-foreground: #ffffff;
+
+  /* Semantic Colors for Better Accessibility */
+  --primary: var(--dark-teal);
+  --primary-foreground: var(--dark-teal-foreground);
+  --secondary: var(--teal);
+  --secondary-foreground: var(--teal-foreground);
+  --accent: var(--scarlet-rush);
+  --accent-foreground: var(--scarlet-rush-foreground);
+  --success: #10b981; /* Tailwind's emerald-500 */
+  --success-foreground: #ffffff;
+  --warning: var(--golden-pollen);
+  --warning-foreground: var(--golden-pollen-foreground);
+  --destructive: #ef4444; /* Tailwind's red-500 */
+  --destructive-foreground: #ffffff;
+  --muted: #9ca3af; /* Tailwind's gray-500 */
+  --muted-foreground: #6b7280; /* Tailwind's gray-600 */
+  --border: #e5e7eb; /* Tailwind's gray-200 */
+  --input: #e5e7eb;
+  --ring: var(--primary);
+
+  /* Additional shades for better contrast */
+  --card: #ffffff;
+  --card-foreground: var(--foreground);
+  --popover: #ffffff;
+  --popover-foreground: var(--foreground);
+  --button: var(--primary);
+  --button-foreground: var(--primary-foreground);
 }
 
-@theme inline {
+@theme {
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+  --color-warning: var(--warning);
+  --color-warning-foreground: var(--warning-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-button: var(--button);
+  --color-button-foreground: var(--button-foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+/* Dark mode theme */
+.dark {
+  --background: #0a0a0a;
+  --foreground: #ededed;
+
+  /* Dark mode brand colors with better contrast */
+  --teal: #2db0b9; /* Lighter for dark mode */
+  --teal-foreground: #ffffff;
+  --dark-teal: #1a7d92; /* Adjusted for dark mode */
+  --dark-teal-foreground: #ffffff;
+  --scarlet-rush: #f85d59; /* Lighter for dark mode */
+  --scarlet-rush-foreground: #ffffff;
+  --golden-pollen: #f0c66e; /* Adjusted for dark mode */
+  --golden-pollen-foreground: #000000;
+  --graphite: #c2bfc1; /* Lighter for dark mode */
+  --graphite-foreground: #000000;
+
+  /* Semantic Colors for Dark Mode */
+  --primary: var(--dark-teal);
+  --primary-foreground: var(--dark-teal-foreground);
+  --secondary: var(--teal);
+  --secondary-foreground: var(--teal-foreground);
+  --accent: var(--scarlet-rush);
+  --accent-foreground: var(--scarlet-rush-foreground);
+  --success: #34d399; /* Tailwind's emerald-400 */
+  --success-foreground: #000000;
+  --warning: var(--golden-pollen);
+  --warning-foreground: var(--golden-pollen-foreground);
+  --destructive: #f87171; /* Tailwind's red-400 */
+  --destructive-foreground: #000000;
+  --muted: #6b7280; /* Tailwind's gray-600 */
+  --muted-foreground: #9ca3af; /* Tailwind's gray-400 */
+  --border: #374151; /* Tailwind's gray-700 */
+  --input: #374151;
+  --ring: var(--primary);
+
+  --card: #1f2937; /* Tailwind's gray-800 */
+  --card-foreground: var(--foreground);
+  --popover: #1f2937;
+  --popover-foreground: var(--foreground);
+  --button: var(--primary);
+  --button-foreground: var(--primary-foreground);
+}
+
+/* Light mode as default */
+:root, .light {
+  --background: #ffffff;
+  --foreground: #171717;
+
+  /* Brand Color Palette with Better Contrast */
+  --teal: #177e89;
+  --teal-foreground: #ffffff;
+  --dark-teal: #084c61;
+  --dark-teal-foreground: #ffffff;
+  --scarlet-rush: #db3a34;
+  --scarlet-rush-foreground: #ffffff;
+  --golden-pollen: #e6b448; /* Adjusted for better contrast */
+  --golden-pollen-foreground: #000000;
+  --graphite: #323031;
+  --graphite-foreground: #ffffff;
+
+  /* Semantic Colors for Better Accessibility */
+  --primary: var(--dark-teal);
+  --primary-foreground: var(--dark-teal-foreground);
+  --secondary: var(--teal);
+  --secondary-foreground: var(--teal-foreground);
+  --accent: var(--scarlet-rush);
+  --accent-foreground: var(--scarlet-rush-foreground);
+  --success: #10b981; /* Tailwind's emerald-500 */
+  --success-foreground: #ffffff;
+  --warning: var(--golden-pollen);
+  --warning-foreground: var(--golden-pollen-foreground);
+  --destructive: #ef4444; /* Tailwind's red-500 */
+  --destructive-foreground: #ffffff;
+  --muted: #9ca3af; /* Tailwind's gray-500 */
+  --muted-foreground: #6b7280; /* Tailwind's gray-600 */
+  --border: #e5e7eb; /* Tailwind's gray-200 */
+  --input: #e5e7eb;
+  --ring: var(--primary);
+
+  /* Additional shades for better contrast */
+  --card: #ffffff;
+  --card-foreground: var(--foreground);
+  --popover: #ffffff;
+  --popover-foreground: var(--foreground);
+  --button: var(--primary);
+  --button-foreground: var(--primary-foreground);
 }
 
 body {

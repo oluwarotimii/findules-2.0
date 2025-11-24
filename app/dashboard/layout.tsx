@@ -18,6 +18,7 @@ import {
     X,
     Building
 } from 'lucide-react'
+import { ThemeToggle } from '@/components/ui/theme-toggle'
 
 interface User {
     id: string
@@ -73,10 +74,10 @@ export default function DashboardLayout({
 
     if (loading) {
         return (
-            <div className="min-h-screen flex items-center justify-center bg-gray-50">
+            <div className="min-h-screen flex items-center justify-center bg-[color:var(--background)]">
                 <div className="text-center">
-                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-                    <p className="mt-4 text-gray-600">Loading...</p>
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[color:var(--primary)] mx-auto"></div>
+                    <p className="mt-4 text-[color:var(--muted-foreground)]">Loading...</p>
                 </div>
             </div>
         )
@@ -102,36 +103,36 @@ export default function DashboardLayout({
     )
 
     return (
-        <div className="min-h-screen bg-gray-50">
+        <div className="min-h-screen bg-[color:var(--background)]">
             {/* Sidebar */}
             <aside
                 className={`fixed top-0 left-0 z-40 h-screen transition-transform ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'
-                    } bg-gradient-to-b from-blue-900 to-blue-800 w-64`}
+                    } bg-[color:var(--primary)] w-64`}
             >
                 <div className="h-full px-3 py-4 overflow-y-auto flex flex-col">
                     {/* Logo */}
                     <div className="mb-8 px-3 flex justify-between items-center">
                         <div>
-                            <h1 className="text-2xl font-bold text-white">Findules</h1>
-                            <p className="text-blue-200 text-sm mt-1">Financial Operations</p>
+                            <h1 className="text-2xl font-bold text-[color:var(--primary-foreground)]">Findules</h1>
+                            <p className="text-[color:var(--primary-foreground)/.7] text-sm mt-1">Financial Operations</p>
                         </div>
                         <button
                             onClick={() => setSidebarOpen(false)}
-                            className="lg:hidden text-white hover:bg-blue-700 p-1 rounded"
+                            className="lg:hidden text-[color:var(--primary-foreground)] hover:bg-[color:var(--primary)/.8] p-1 rounded"
                         >
                             <X size={20} />
                         </button>
                     </div>
 
                     {/* User Info */}
-                    <div className="mb-6 px-3 py-3 bg-blue-800 rounded-lg">
-                        <p className="text-white font-semibold truncate">{user?.name}</p>
-                        <p className="text-blue-200 text-sm truncate">{user?.email}</p>
+                    <div className="mb-6 px-3 py-3 bg-[color:var(--primary)/.8] rounded-lg">
+                        <p className="text-[color:var(--primary-foreground)] font-semibold truncate">{user?.name}</p>
+                        <p className="text-[color:var(--primary-foreground)/.7] text-sm truncate">{user?.email}</p>
                         <div className="mt-2 flex items-center gap-2 flex-wrap">
-                            <span className="px-2 py-1 bg-blue-700 text-blue-100 text-xs rounded">
+                            <span className="px-2 py-1 bg-[color:var(--primary)/.7] text-[color:var(--primary-foreground)/.9] text-xs rounded">
                                 {user?.role}
                             </span>
-                            <span className="px-2 py-1 bg-blue-700 text-blue-100 text-xs rounded">
+                            <span className="px-2 py-1 bg-[color:var(--primary)/.7] text-[color:var(--primary-foreground)/.9] text-xs rounded">
                                 {user?.branchName}
                             </span>
                         </div>
@@ -143,7 +144,7 @@ export default function DashboardLayout({
                             <Link
                                 key={item.name}
                                 href={item.href}
-                                className="flex items-center px-3 py-2.5 text-white hover:bg-blue-700 rounded-lg transition-colors group"
+                                className="flex items-center px-3 py-2.5 text-[color:var(--primary-foreground)] hover:bg-[color:var(--primary)/.8] rounded-lg transition-colors group"
                             >
                                 <item.icon className="w-5 h-5 mr-3" />
                                 <span className="font-medium">{item.name}</span>
@@ -155,7 +156,7 @@ export default function DashboardLayout({
                     <div className="mt-auto pt-4">
                         <button
                             onClick={handleLogout}
-                            className="w-full flex items-center px-3 py-2.5 text-white bg-red-600 hover:bg-red-700 rounded-lg transition-colors"
+                            className="w-full flex items-center px-3 py-2.5 text-[color:var(--primary-foreground)] bg-[color:var(--destructive)] hover:bg-[color:var(--destructive)/.9] rounded-lg transition-colors"
                         >
                             <LogOut className="w-5 h-5 mr-3" />
                             <span className="font-medium">Logout</span>
@@ -167,18 +168,19 @@ export default function DashboardLayout({
             {/* Main Content */}
             <div className={`${sidebarOpen ? 'ml-64' : 'ml-0'} transition-all duration-300`}>
                 {/* Top Bar */}
-                <header className="bg-white shadow-sm sticky top-0 z-30">
+                <header className="bg-[color:var(--card)] shadow-sm sticky top-0 z-30 border-b border-[color:var(--border)]">
                     <div className="px-6 py-4 flex items-center justify-between">
                         <button
                             onClick={() => setSidebarOpen(!sidebarOpen)}
-                            className="p-2 rounded-lg hover:bg-gray-100 transition-colors text-gray-600"
+                            className="p-2 rounded-lg hover:bg-[color:var(--muted)/.1] transition-colors text-[color:var(--card-foreground)]"
                         >
                             <Menu className="w-6 h-6" />
                         </button>
 
                         <div className="flex items-center gap-4">
+                            <ThemeToggle />
                             <div className="text-right">
-                                <p className="text-sm text-gray-600">
+                                <p className="text-sm text-[color:var(--card-foreground)]">
                                     {new Date().toLocaleDateString('en-US', {
                                         weekday: 'long',
                                         year: 'numeric',
@@ -192,7 +194,7 @@ export default function DashboardLayout({
                 </header>
 
                 {/* Page Content */}
-                <main className="p-6">
+                <main className="p-6 bg-[color:var(--background)] min-h-[calc(100vh-4rem)]">
                     {children}
                 </main>
             </div>

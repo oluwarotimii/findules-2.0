@@ -172,34 +172,34 @@ export default function ImprestPage() {
     if (loading) {
         return (
             <div className="flex items-center justify-center h-64">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-orange-600"></div>
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[color:var(--accent)]"></div>
             </div>
         )
     }
 
     return (
-        <div>
+        <div className="text-[color:var(--card-foreground)]">
             {/* Header */}
             <div className="flex items-center justify-between mb-8">
                 <div>
-                    <h1 className="text-2xl font-bold text-gray-800 flex items-center">
-                        <Wallet className="w-8 h-8 mr-3 text-orange-600" />
+                    <h1 className="text-2xl font-bold text-[color:var(--card-foreground)] flex items-center">
+                        <Wallet className="w-8 h-8 mr-3 text-[color:var(--accent)]" />
                         Imprest Management
                     </h1>
-                    <p className="text-gray-500 text-sm mt-1">Track cash advances and retirements</p>
+                    <p className="text-[color:var(--muted-foreground)] text-sm mt-1">Track cash advances and retirements</p>
                 </div>
                 <div className="flex gap-2">
-                    <button onClick={() => handleExport('csv')} className="flex items-center px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50">
+                    <button onClick={() => handleExport('csv')} className="flex items-center px-4 py-2 border border-[color:var(--border)] text-[color:var(--card-foreground)] rounded-lg hover:bg-[color:var(--muted)/.2]">
                         <Download className="w-4 h-4 mr-2" />
                         CSV
                     </button>
-                    <button onClick={() => handleExport('excel')} className="flex items-center px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50">
+                    <button onClick={() => handleExport('excel')} className="flex items-center px-4 py-2 border border-[color:var(--border)] text-[color:var(--card-foreground)] rounded-lg hover:bg-[color:var(--muted)/.2]">
                         <Download className="w-4 h-4 mr-2" />
                         Excel
                     </button>
                     <button
                         onClick={() => router.push('/dashboard/imprest/issue')}
-                        className="flex items-center px-6 py-3 bg-orange-600 text-white rounded-lg font-semibold shadow-lg hover:bg-orange-700 transition-all transform hover:scale-105"
+                        className="flex items-center px-6 py-3 bg-[color:var(--accent)] text-[color:var(--accent-foreground)] rounded-lg font-semibold shadow-lg hover:bg-[color:var(--accent)/.9] transition-all transform hover:scale-105"
                     >
                         <Plus className="w-5 h-5 mr-2" />
                         Issue Imprest
@@ -209,59 +209,59 @@ export default function ImprestPage() {
 
             {/* Summary Cards */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-                <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                <div className="bg-[color:var(--card)] p-6 rounded-xl shadow-sm border border-[color:var(--border)]">
                     <div className="flex items-center justify-between">
                         <div>
-                            <p className="text-gray-500 text-sm">Outstanding</p>
-                            <p className="text-3xl font-bold text-blue-600 mt-1">{stats.outstanding}</p>
+                            <p className="text-[color:var(--muted-foreground)] text-sm">Outstanding</p>
+                            <p className="text-3xl font-bold text-[color:var(--primary)] mt-1">{stats.outstanding}</p>
                         </div>
-                        <div className="p-3 bg-blue-100 rounded-lg">
-                            <Clock className="w-6 h-6 text-blue-600" />
+                        <div className="p-3 bg-[color:var(--primary)/.2] rounded-lg">
+                            <Clock className="w-6 h-6 text-[color:var(--primary)]" />
                         </div>
                     </div>
                 </div>
 
-                <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                <div className="bg-[color:var(--card)] p-6 rounded-xl shadow-sm border border-[color:var(--border)]">
                     <div className="flex items-center justify-between">
                         <div>
-                            <p className="text-gray-500 text-sm">Total Amount</p>
-                            <p className="text-2xl font-bold text-gray-800 mt-1">
+                            <p className="text-[color:var(--muted-foreground)] text-sm">Total Amount</p>
+                            <p className="text-2xl font-bold text-[color:var(--card-foreground)] mt-1">
                                 ₦{stats.outstandingAmount.toLocaleString()}
                             </p>
                         </div>
-                        <div className="p-3 bg-orange-100 rounded-lg">
-                            <Wallet className="w-6 h-6 text-orange-600" />
+                        <div className="p-3 bg-[color:var(--accent)/.2] rounded-lg">
+                            <Wallet className="w-6 h-6 text-[color:var(--accent)]" />
                         </div>
                     </div>
                 </div>
 
-                <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                <div className="bg-[color:var(--card)] p-6 rounded-xl shadow-sm border border-[color:var(--border)]">
                     <div className="flex items-center justify-between">
                         <div>
-                            <p className="text-gray-500 text-sm">Overdue</p>
-                            <p className="text-3xl font-bold text-red-600 mt-1">{stats.overdue}</p>
+                            <p className="text-[color:var(--muted-foreground)] text-sm">Overdue</p>
+                            <p className="text-3xl font-bold text-[color:var(--destructive)] mt-1">{stats.overdue}</p>
                         </div>
-                        <div className="p-3 bg-red-100 rounded-lg">
-                            <AlertCircle className="w-6 h-6 text-red-600" />
+                        <div className="p-3 bg-[color:var(--destructive)/.2] rounded-lg">
+                            <AlertCircle className="w-6 h-6 text-[color:var(--destructive)]" />
                         </div>
                     </div>
                 </div>
 
-                <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+                <div className="bg-[color:var(--card)] p-6 rounded-xl shadow-sm border border-[color:var(--border)]">
                     <div className="flex items-center justify-between">
                         <div>
-                            <p className="text-gray-500 text-sm">Retired</p>
-                            <p className="text-3xl font-bold text-green-600 mt-1">{stats.retired}</p>
+                            <p className="text-[color:var(--muted-foreground)] text-sm">Retired</p>
+                            <p className="text-3xl font-bold text-[color:var(--success)] mt-1">{stats.retired}</p>
                         </div>
-                        <div className="p-3 bg-green-100 rounded-lg">
-                            <CheckCircle className="w-6 h-6 text-green-600" />
+                        <div className="p-3 bg-[color:var(--success)/.2] rounded-lg">
+                            <CheckCircle className="w-6 h-6 text-[color:var(--success)]" />
                         </div>
                     </div>
                 </div>
             </div>
 
             {/* Filters and Search */}
-            <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100 mb-6">
+            <div className="bg-[color:var(--card)] p-6 rounded-xl shadow-sm border border-[color:var(--border)] mb-6">
                 {/* Status Tabs */}
                 <div className="flex flex-wrap gap-2 mb-4">
                     {['ALL', 'ISSUED', 'RETIRED', 'OVERDUE'].map(tab => (
@@ -269,8 +269,8 @@ export default function ImprestPage() {
                             key={tab}
                             onClick={() => setActiveTab(tab)}
                             className={`px-4 py-2 rounded-lg font-medium transition-colors ${activeTab === tab
-                                ? 'bg-orange-600 text-white'
-                                : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                                ? 'bg-[color:var(--accent)] text-[color:var(--accent-foreground)]'
+                                : 'bg-[color:var(--muted)/.2] text-[color:var(--card-foreground)] hover:bg-[color:var(--muted)/.3]'
                                 }`}
                         >
                             {tab}
@@ -280,86 +280,90 @@ export default function ImprestPage() {
 
                 {/* Search */}
                 <div className="relative">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[color:var(--muted-foreground)] w-5 h-5" />
                     <input
                         type="text"
                         placeholder="Search by staff name or imprest number..."
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
-                        className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                        className="w-full pl-10 pr-4 py-2 border border-[color:var(--border)] rounded-lg focus:ring-2 focus:ring-[color:var(--accent)] bg-[color:var(--card)] text-[color:var(--card-foreground)]"
                     />
                 </div>
             </div>
 
             {/* Imprest List */}
-            <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+            <div className="bg-[color:var(--card)] rounded-xl shadow-sm border border-[color:var(--border)] overflow-hidden">
                 {filteredImprest.length === 0 ? (
                     <div className="text-center py-12">
-                        <Wallet className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                        <p className="text-gray-500">No imprest records found</p>
+                        <Wallet className="w-16 h-16 text-[color:var(--muted-foreground)] mx-auto mb-4" />
+                        <p className="text-[color:var(--muted-foreground)]">No imprest records found</p>
                     </div>
                 ) : (
                     <div className="overflow-x-auto">
                         <table className="w-full">
-                            <thead className="bg-gray-50 border-b border-gray-200">
+                            <thead className="bg-[color:var(--muted)/.1] border-b border-[color:var(--border)]">
                                 <tr>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-[color:var(--muted-foreground)] uppercase tracking-wider">
                                         Imprest No
                                     </th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-[color:var(--muted-foreground)] uppercase tracking-wider">
                                         Staff Name
                                     </th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-[color:var(--muted-foreground)] uppercase tracking-wider">
                                         Amount
                                     </th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-[color:var(--muted-foreground)] uppercase tracking-wider">
                                         Category
                                     </th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-[color:var(--muted-foreground)] uppercase tracking-wider">
                                         Date Issued
                                     </th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-[color:var(--muted-foreground)] uppercase tracking-wider">
                                         Status
                                     </th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-[color:var(--muted-foreground)] uppercase tracking-wider">
                                         Days
                                     </th>
-                                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-[color:var(--muted-foreground)] uppercase tracking-wider">
                                         Actions
                                     </th>
                                 </tr>
                             </thead>
-                            <tbody className="bg-white divide-y divide-gray-200">
+                            <tbody className="divide-y divide-[color:var(--border)]">
                                 {filteredImprest.map((item) => (
-                                    <tr key={item.imprestNo} className="hover:bg-gray-50">
+                                    <tr key={item.imprestNo} className="hover:bg-[color:var(--muted)/.1]">
                                         <td className="px-6 py-4 whitespace-nowrap">
-                                            <span className="font-medium text-gray-900">{item.imprestNo}</span>
+                                            <span className="font-medium text-[color:var(--card-foreground)]">{item.imprestNo}</span>
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap">
-                                            <span className="text-gray-900">{item.staffName}</span>
+                                            <span className="text-[color:var(--card-foreground)]">{item.staffName}</span>
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap">
-                                            <span className="font-semibold text-gray-900">
+                                            <span className="font-semibold text-[color:var(--card-foreground)]">
                                                 {formatCurrency(item.amount)}
                                             </span>
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap">
-                                            <span className="text-gray-600">{item.category}</span>
+                                            <span className="text-[color:var(--muted-foreground)]">{item.category}</span>
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap">
-                                            <span className="text-gray-600">
+                                            <span className="text-[color:var(--muted-foreground)]">
                                                 {new Date(item.dateIssued).toLocaleDateString()}
                                             </span>
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap">
-                                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusBadge(item.status)}`}>
+                                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                                                item.status === 'ISSUED' ? 'bg-[color:var(--primary)/.2] text-[color:var(--primary)]' :
+                                                item.status === 'RETIRED' ? 'bg-[color:var(--success)/.2] text-[color:var(--success)]' :
+                                                'bg-[color:var(--destructive)/.2] text-[color:var(--destructive)]'
+                                            }`}>
                                                 {getStatusIcon(item.status)}
                                                 <span className="ml-1">{item.status}</span>
                                             </span>
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap">
                                             {item.status !== 'RETIRED' && (
-                                                <span className={`text-sm ${calculateDaysOutstanding(item.dateIssued) > 30 ? 'text-red-600 font-semibold' : 'text-gray-600'}`}>
+                                                <span className={`text-sm ${calculateDaysOutstanding(item.dateIssued) > 30 ? 'text-[color:var(--destructive)] font-semibold' : 'text-[color:var(--muted-foreground)]'}`}>
                                                     {calculateDaysOutstanding(item.dateIssued)} days
                                                 </span>
                                             )}
@@ -369,7 +373,7 @@ export default function ImprestPage() {
                                                 {item.status === 'ISSUED' || item.status === 'OVERDUE' ? (
                                                     <button
                                                         onClick={() => router.push(`/dashboard/imprest/${item.imprestNo}/retire`)}
-                                                        className="px-3 py-1 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                                                        className="px-3 py-1 bg-[color:var(--success)] text-[color:var(--success-foreground)] rounded-lg hover:bg-[color:var(--success)/.9] transition-colors"
                                                     >
                                                         Retire
                                                     </button>
@@ -377,7 +381,7 @@ export default function ImprestPage() {
                                                 {item.status !== 'RETIRED' && (
                                                     <button
                                                         onClick={() => handleDelete(item.imprestNo)}
-                                                        className="p-1 text-red-600 hover:bg-red-50 rounded transition-colors"
+                                                        className="p-1 text-[color:var(--destructive)] hover:bg-[color:var(--destructive)/.1] rounded transition-colors"
                                                     >
                                                         <Trash2 className="w-4 h-4" />
                                                     </button>

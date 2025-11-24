@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import { ThemeToggle } from '@/components/ui/theme-toggle'
 
 export default function LoginPage() {
   const router = useRouter()
@@ -46,22 +47,25 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100">
-      <div className="bg-white p-8 rounded-2xl shadow-2xl w-full max-w-md">
+    <div className="min-h-screen flex items-center justify-center bg-[color:var(--background)] relative">
+      <div className="absolute top-4 right-4">
+        <ThemeToggle />
+      </div>
+      <div className="bg-[color:var(--card)] p-8 rounded-2xl shadow-2xl w-full max-w-md border border-[color:var(--border)]">
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-gray-800 mb-2">Findules</h1>
-          <p className="text-gray-600">Financial Operations Management</p>
+          <h1 className="text-4xl font-bold text-[color:var(--card-foreground)] mb-2">Findules</h1>
+          <p className="text-[color:var(--muted-foreground)]">Financial Operations Management</p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
           {error && (
-            <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg">
+            <div className="bg-[color:var(--destructive)/.1] border border-[color:var(--destructive)] text-[color:var(--destructive)] px-4 py-3 rounded-lg">
               {error}
             </div>
           )}
 
           <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+            <label htmlFor="email" className="block text-sm font-medium text-[color:var(--card-foreground)] mb-2">
               Email Address
             </label>
             <input
@@ -70,13 +74,13 @@ export default function LoginPage() {
               required
               value={formData.email}
               onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+              className="w-full px-4 py-3 border border-[color:var(--border)] rounded-lg focus:ring-2 focus:ring-[color:var(--primary)] focus:border-transparent transition bg-[color:var(--card)] text-[color:var(--card-foreground)]"
               placeholder="you@example.com"
             />
           </div>
 
           <div>
-            <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
+            <label htmlFor="password" className="block text-sm font-medium text-[color:var(--card-foreground)] mb-2">
               Password
             </label>
             <input
@@ -85,7 +89,7 @@ export default function LoginPage() {
               required
               value={formData.password}
               onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+              className="w-full px-4 py-3 border border-[color:var(--border)] rounded-lg focus:ring-2 focus:ring-[color:var(--primary)] focus:border-transparent transition bg-[color:var(--card)] text-[color:var(--card-foreground)]"
               placeholder="••••••••"
             />
           </div>
@@ -93,13 +97,13 @@ export default function LoginPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-3 px-4 rounded-lg transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full bg-[color:var(--primary)] hover:bg-[color:var(--primary)/.9] text-[color:var(--primary-foreground)] font-semibold py-3 px-4 rounded-lg transition duration-200 disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {loading ? 'Signing in...' : 'Sign In'}
           </button>
         </form>
 
-        <div className="mt-6 text-center text-sm text-gray-600">
+        <div className="mt-6 text-center text-sm text-[color:var(--muted-foreground)]">
           <p>Default credentials for testing:</p>
           <p className="font-mono text-xs mt-1">admin@findules.com / password</p>
         </div>
