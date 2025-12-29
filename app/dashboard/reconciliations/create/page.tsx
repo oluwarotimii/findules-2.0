@@ -244,19 +244,19 @@ export default function CreateReconciliationPage() {
                 <div className="flex items-center gap-4">
                     <button
                         onClick={() => router.back()}
-                        className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                        className="p-2 hover:bg-[color:var(--muted)/.1] rounded-lg transition-colors"
                     >
-                        <ArrowLeft className="w-6 h-6 text-gray-600" />
+                        <ArrowLeft className="w-6 h-6 text-[color:var(--muted-foreground)]" />
                     </button>
                     <div>
-                        <h1 className="text-2xl font-bold text-gray-800">New Reconciliation</h1>
-                        <p className="text-gray-500 text-sm">Daily Cashier Reconciliation Form</p>
+                        <h1 className="text-2xl font-bold text-[color:var(--card-foreground)]">New Reconciliation</h1>
+                        <p className="text-[color:var(--muted-foreground)] text-sm">Daily Cashier Reconciliation Form</p>
                     </div>
                 </div>
             </div>
 
             {error && (
-                <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg flex items-center text-red-700">
+                <div className="mb-6 p-4 bg-[color:var(--destructive)/.1] border border-[color:var(--destructive)/.2] rounded-lg flex items-center text-[color:var(--destructive)]">
                     <AlertCircle className="w-5 h-5 mr-2" />
                     {error}
                 </div>
@@ -302,22 +302,22 @@ export default function CreateReconciliationPage() {
                 </section>
 
                 {/* 2. Opening Balance */}
-                <section className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-                    <h2 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
-                        <ArrowDownRight className="w-5 h-5 mr-2 text-green-600" />
+                <section className="bg-[color:var(--card)] p-6 rounded-xl shadow-sm border border-[color:var(--border)]">
+                    <h2 className="text-lg font-semibold text-[color:var(--card-foreground)] mb-4 flex items-center">
+                        <ArrowDownRight className="w-5 h-5 mr-2 text-[color:var(--success)]" />
                         Opening Balance
                     </h2>
 
                     {/* Info message about auto-population */}
                     {loadingPreviousBalance && (
-                        <div className="mb-4 p-3 bg-blue-50 border border-blue-200 rounded-lg flex items-center text-blue-700 text-sm">
+                        <div className="mb-4 p-3 bg-[color:var(--secondary)/.1] border border-[color:var(--secondary)/.2] rounded-lg flex items-center text-[color:var(--secondary)] text-sm">
                             <Info className="w-4 h-4 mr-2 flex-shrink-0" />
                             Loading previous closing balance...
                         </div>
                     )}
 
                     {previousBalance?.hasHistory && !loadingPreviousBalance && (
-                        <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-lg flex items-center text-green-700 text-sm">
+                        <div className="mb-4 p-3 bg-[color:var(--success)/.1] border border-[color:var(--success)/.2] rounded-lg flex items-center text-[color:var(--success)] text-sm">
                             <Info className="w-4 h-4 mr-2 flex-shrink-0" />
                             <span>
                                 Opening balance auto-filled from previous reconciliation (
@@ -371,14 +371,14 @@ export default function CreateReconciliationPage() {
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Total Sales (₦)</label>
-                            <p className="text-xs text-gray-500 mb-2">From Busy Accounting Software</p>
+                            <label className="block text-sm font-medium text-[color:var(--card-foreground)] mb-1">Total Sales (₦)</label>
+                            <p className="text-xs text-[color:var(--muted-foreground)] mb-2">From Busy Accounting Software</p>
                             <input
                                 type="number"
                                 name="totalSales"
                                 value={formData.totalSales}
                                 onChange={handleChange}
-                                className="w-full p-2 text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                className="w-full p-2 text-[color:var(--card-foreground)] border border-[color:var(--border)] rounded-lg focus:ring-2 focus:ring-[color:var(--primary)] focus:border-[color:var(--primary)]"
                                 min="0"
                                 step="0.01"
                                 placeholder="0.00"
@@ -394,23 +394,23 @@ export default function CreateReconciliationPage() {
                 </section>
 
                 {/* 4. Cashier Record Breakdown */}
-                <section className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-                    <h2 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
-                        <Calculator className="w-5 h-5 mr-2 text-indigo-600" />
+                <section className="bg-[color:var(--card)] p-6 rounded-xl shadow-sm border border-[color:var(--border)]">
+                    <h2 className="text-lg font-semibold text-[color:var(--card-foreground)] mb-4 flex items-center">
+                        <Calculator className="w-5 h-5 mr-2 text-[color:var(--primary)]" />
                         Cashier Record Breakdown
                     </h2>
-                    <p className="text-sm text-gray-600 mb-4">All items recorded in the cashier's book (all subtracted from turnover)</p>
+                    <p className="text-sm text-[color:var(--card-foreground)] mb-4">All items recorded in the cashier's book (all subtracted from turnover)</p>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">POS Transactions (₦)</label>
-                            <p className="text-xs text-gray-500 mb-2">Total POS/card transactions</p>
+                            <label className="block text-sm font-medium text-[color:var(--card-foreground)] mb-1">POS Transactions (₦)</label>
+                            <p className="text-xs text-[color:var(--muted-foreground)] mb-2">Total POS/card transactions</p>
                             <input
                                 type="number"
                                 name="posTransactionsAmount"
                                 value={formData.posTransactionsAmount}
                                 onChange={handleChange}
-                                className="w-full p-2 text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                className="w-full p-2 text-[color:var(--card-foreground)] border border-[color:var(--border)] rounded-lg focus:ring-2 focus:ring-[color:var(--primary)] focus:border-[color:var(--primary)]"
                                 min="0"
                                 step="0.01"
                                 placeholder="0.00"
@@ -554,25 +554,25 @@ export default function CreateReconciliationPage() {
                 </section>
 
                 {/* 6. Bank Deposit */}
-                <section className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-                    <h2 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
-                        <CreditCard className="w-5 h-5 mr-2 text-purple-600" />
+                <section className="bg-[color:var(--card)] p-6 rounded-xl shadow-sm border border-[color:var(--border)]">
+                    <h2 className="text-lg font-semibold text-[color:var(--card-foreground)] mb-4 flex items-center">
+                        <CreditCard className="w-5 h-5 mr-2 text-[color:var(--warning)]" />
                         Bank Deposit Details
                     </h2>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Bank Name</label>
+                            <label className="block text-sm font-medium text-[color:var(--card-foreground)] mb-1">Bank Name</label>
                             <input
                                 type="text"
                                 name="bankName"
                                 value={formData.bankName}
                                 onChange={handleChange}
-                                className="w-full p-2 text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                className="w-full p-2 text-[color:var(--card-foreground)] border border-[color:var(--border)] rounded-lg focus:ring-2 focus:ring-[color:var(--primary)] focus:border-[color:var(--primary)]"
                                 placeholder="e.g. First Bank"
                             />
                         </div>
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Teller / Slip Number</label>
+                            <label className="block text-sm font-medium text-[color:var(--card-foreground)] mb-1">Teller / Slip Number</label>
                             <input
                                 type="text"
                                 name="tellerNo"
@@ -611,10 +611,10 @@ export default function CreateReconciliationPage() {
                                 required
                             />
                         </div>
-                        <div className={`p-4 rounded-lg ${Math.abs(calculations.overageShortage) < 100 ? 'bg-green-100 text-green-800' :
-                            calculations.overageShortage < 0 ? 'bg-red-100 text-red-800' : 'bg-yellow-100 text-yellow-800'
+                        <div className={`p-4 rounded-lg ${Math.abs(calculations.overageShortage) < 100 ? 'bg-[color:var(--success)/.1] text-[color:var(--success)]' :
+                            calculations.overageShortage < 0 ? 'bg-[color:var(--destructive)/.1] text-[color:var(--destructive)]' : 'bg-[color:var(--warning)/.1] text-[color:var(--warning)]'
                             }`}>
-                            <label className="block text-xs font-semibold uppercase tracking-wide mb-1">Variance</label>
+                            <label className="block text-xs font-semibold uppercase tracking-wide mb-1 text-[color:var(--muted-foreground)]">Variance</label>
                             <p className="text-xl font-bold">{formatCurrency(calculations.overageShortage)}</p>
                             <p className="text-xs mt-1 font-medium">
                                 {Math.abs(calculations.overageShortage) < 100 ? 'Balanced' :
@@ -642,7 +642,7 @@ export default function CreateReconciliationPage() {
                     <button
                         type="submit"
                         disabled={loading}
-                        className={`flex items-center px-8 py-4 bg-blue-600 text-white rounded-xl font-semibold shadow-lg hover:bg-blue-700 transition-all transform hover:scale-105 ${loading ? 'opacity-70 cursor-not-allowed' : ''
+                        className={`flex items-center px-8 py-4 bg-[color:var(--primary)] text-[color:var(--primary-foreground)] rounded-xl font-semibold shadow-lg hover:bg-[color:var(--primary)/.9] transition-all transform hover:scale-105 ${loading ? 'opacity-70 cursor-not-allowed' : ''
                             }`}
                     >
                         {loading ? (

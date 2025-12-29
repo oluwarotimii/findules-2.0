@@ -164,12 +164,12 @@ export default function CashiersPage() {
             {/* Header */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
-                    <h1 className="text-2xl font-bold text-gray-800">Manage Cashiers</h1>
-                    <p className="text-gray-500 text-sm">Add and manage cashier profiles for reconciliation</p>
+                    <h1 className="text-2xl font-bold text-[color:var(--card-foreground)]">Manage Cashiers</h1>
+                    <p className="text-[color:var(--muted-foreground)] text-sm">Add and manage cashier profiles for reconciliation</p>
                 </div>
                 <button
                     onClick={() => setShowAddForm(!showAddForm)}
-                    className="flex items-center justify-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                    className="flex items-center justify-center px-4 py-2 bg-[color:var(--primary)] text-[color:var(--primary-foreground)] rounded-lg hover:bg-[color:var(--primary)/.9] transition-colors"
                 >
                     {showAddForm ? 'Cancel' : (
                         <>
@@ -182,14 +182,14 @@ export default function CashiersPage() {
 
             {/* Add Cashier Form */}
             {showAddForm && (
-                <div className="bg-white p-6 rounded-xl shadow-sm border border-blue-100 animate-in fade-in slide-in-from-top-4">
-                    <h2 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
-                        <UserPlus className="w-5 h-5 mr-2 text-blue-600" />
+                <div className="bg-[color:var(--card)] p-6 rounded-xl shadow-sm border border-[color:var(--primary)/.2] animate-in fade-in slide-in-from-top-4">
+                    <h2 className="text-lg font-semibold text-[color:var(--card-foreground)] mb-4 flex items-center">
+                        <UserPlus className="w-5 h-5 mr-2 text-[color:var(--primary)]" />
                         Add New Cashier
                     </h2>
 
                     {error && (
-                        <div className="mb-4 p-3 bg-red-50 text-red-700 rounded-lg flex items-center text-sm">
+                        <div className="mb-4 p-3 bg-[color:var(--destructive)/.1] text-[color:var(--destructive)] rounded-lg flex items-center text-sm">
                             <AlertCircle className="w-4 h-4 mr-2" />
                             {error}
                         </div>
@@ -197,22 +197,22 @@ export default function CashiersPage() {
 
                     <form onSubmit={handleAddCashier} className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Cashier Name</label>
+                            <label className="block text-sm font-medium text-[color:var(--card-foreground)] mb-1">Cashier Name</label>
                             <input
                                 type="text"
                                 value={newCashierName}
                                 onChange={(e) => setNewCashierName(e.target.value)}
-                                className="w-full p-2 text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                className="w-full p-2 text-[color:var(--card-foreground)] border border-[color:var(--border)] rounded-lg focus:ring-2 focus:ring-[color:var(--primary)] focus:border-[color:var(--primary)]"
                                 placeholder="e.g. John Doe"
                                 required
                             />
                         </div>
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Branch</label>
+                            <label className="block text-sm font-medium text-[color:var(--card-foreground)] mb-1">Branch</label>
                             <select
                                 value={newCashierBranchId}
                                 onChange={(e) => setNewCashierBranchId(e.target.value)}
-                                className="w-full p-2 text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                className="w-full p-2 text-[color:var(--card-foreground)] border border-[color:var(--border)] rounded-lg focus:ring-2 focus:ring-[color:var(--primary)] focus:border-[color:var(--primary)]"
                                 required
                             >
                                 <option value="">Select a branch</option>
@@ -227,7 +227,7 @@ export default function CashiersPage() {
                             <button
                                 type="submit"
                                 disabled={submitting}
-                                className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50"
+                                className="px-6 py-2 bg-[color:var(--primary)] text-[color:var(--primary-foreground)] rounded-lg hover:bg-[color:var(--primary)/.9] disabled:opacity-50"
                             >
                                 {submitting ? 'Adding...' : 'Save Cashier'}
                             </button>
@@ -237,63 +237,63 @@ export default function CashiersPage() {
             )}
 
             {/* Search */}
-            <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
+            <div className="bg-[color:var(--card)] p-4 rounded-xl shadow-sm border border-[color:var(--border)]">
                 <div className="relative">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[color:var(--muted-foreground)] w-5 h-5" />
                     <input
                         type="text"
                         placeholder="Search cashiers..."
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
-                        className="w-full pl-10 pr-4 py-2 text-gray-900 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="w-full pl-10 pr-4 py-2 text-[color:var(--card-foreground)] border border-[color:var(--border)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[color:var(--primary)]"
                     />
                 </div>
             </div>
 
             {/* List */}
-            <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+            <div className="bg-[color:var(--card)] rounded-xl shadow-sm border border-[color:var(--border)] overflow-hidden">
                 <table className="w-full text-left">
-                    <thead className="bg-gray-50 border-b border-gray-100">
+                    <thead className="bg-[color:var(--muted)/.1] border-b border-[color:var(--border)]">
                         <tr>
-                            <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase">Name</th>
-                            <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase">Branch</th>
-                            <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase">Status</th>
-                            <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase text-right">Actions</th>
+                            <th className="px-6 py-4 text-xs font-semibold text-[color:var(--muted-foreground)] uppercase">Name</th>
+                            <th className="px-6 py-4 text-xs font-semibold text-[color:var(--muted-foreground)] uppercase">Branch</th>
+                            <th className="px-6 py-4 text-xs font-semibold text-[color:var(--muted-foreground)] uppercase">Status</th>
+                            <th className="px-6 py-4 text-xs font-semibold text-[color:var(--muted-foreground)] uppercase text-right">Actions</th>
                         </tr>
                     </thead>
-                    <tbody className="divide-y divide-gray-100">
+                    <tbody className="divide-y divide-[color:var(--border)]">
                         {loading ? (
                             <tr>
-                                <td colSpan={4} className="px-6 py-8 text-center text-gray-500">Loading...</td>
+                                <td colSpan={4} className="px-6 py-8 text-center text-[color:var(--muted-foreground)]">Loading...</td>
                             </tr>
                         ) : filteredCashiers.length === 0 ? (
                             <tr>
-                                <td colSpan={4} className="px-6 py-8 text-center text-gray-500">No active cashiers found.</td>
+                                <td colSpan={4} className="px-6 py-8 text-center text-[color:var(--muted-foreground)]">No active cashiers found.</td>
                             </tr>
                         ) : (
                             filteredCashiers.map((cashier) => (
-                                <tr key={cashier.id} className="hover:bg-gray-50">
-                                    <td className="px-6 py-4 font-medium text-gray-900 flex items-center">
-                                        <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 mr-3">
+                                <tr key={cashier.id} className="hover:bg-[color:var(--muted)/.1]">
+                                    <td className="px-6 py-4 font-medium text-[color:var(--card-foreground)] flex items-center">
+                                        <div className="w-8 h-8 rounded-full bg-[color:var(--primary)/.1] flex items-center justify-center text-[color:var(--primary)] mr-3">
                                             <Users className="w-4 h-4" />
                                         </div>
                                         {cashier.name}
                                     </td>
-                                    <td className="px-6 py-4 text-gray-600">
+                                    <td className="px-6 py-4 text-[color:var(--card-foreground)]">
                                         <div className="flex items-center">
-                                            <Building className="w-4 h-4 mr-2 text-gray-400" />
+                                            <Building className="w-4 h-4 mr-2 text-[color:var(--muted-foreground)]" />
                                             {cashier.branch.branchName}
                                         </div>
                                     </td>
                                     <td className="px-6 py-4">
-                                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-[color:var(--success)/.1] text-[color:var(--success)]">
                                             Active
                                         </span>
                                     </td>
                                     <td className="px-6 py-4 text-right">
                                         <button
                                             onClick={() => handleDeleteCashier(cashier.id)}
-                                            className="text-red-600 hover:text-red-900 p-2 hover:bg-red-50 rounded-lg transition-colors"
+                                            className="text-[color:var(--destructive)] hover:text-[color:var(--destructive)/.8] p-2 hover:bg-[color:var(--destructive)/.1] rounded-lg transition-colors"
                                             title="Deactivate"
                                         >
                                             <Trash2 className="w-4 h-4" />

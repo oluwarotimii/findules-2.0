@@ -271,7 +271,7 @@ export default function DashboardPage() {
                     </div>
 
                     <Link
-                        href="/reports"
+                        href="/dashboard/audit-logs"
                         className="mt-4 flex items-center justify-center text-[color:var(--primary)] hover:text-[color:var(--primary)/.8] font-medium text-sm"
                     >
                         View All Activity <ArrowRight className="w-4 h-4 ml-1" />

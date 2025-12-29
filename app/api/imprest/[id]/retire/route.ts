@@ -66,35 +66,78 @@ export async function POST(
         // Calculate balance
         const balance = amount - amountSpent
 
-        // Update imprest
-        const updatedImprest = await prisma.imprest.update({
-            where: { imprestNo: id },
-            data: {
-                status: 'RETIRED',
-                dateRetired: body.dateRetired ? new Date(body.dateRetired) : new Date(),
-                amountSpent,
-                balance,
-                receipts: body.receipts,
-                retirementNotes: body.retirementNotes,
-                retiredBy: user.userId
-            },
-            include: {
-                issuer: {
-                    select: {
-                        name: true
-                    }
+        // Get branch balance
+        const branchBalance = await prisma.branchBalance.findUnique({
+            where: { branchId: imprest.branchId }
+        })
+
+        if (!branchBalance) {
+            return NextResponse.json(
+                { error: 'Branch balance not found' },
+                { status: 400 }
+            )
+        }
+
+        // Update imprest and branch balance in a transaction
+        const result = await prisma.$transaction(async (tx) => {
+            // Update imprest
+            const updatedImprest = await tx.imprest.update({
+                where: { imprestNo: id },
+                data: {
+                    status: 'RETIRED',
+                    dateRetired: body.dateRetired ? new Date(body.dateRetired) : new Date(),
+                    amountSpent,
+                    balance,
+                    receipts: body.receipts,
+                    retirementNotes: body.retirementNotes,
+                    retiredBy: user.userId
                 },
-                retirer: {
-                    select: {
-                        name: true
-                    }
-                },
-                branch: {
-                    select: {
-                        branchName: true
+                include: {
+                    issuer: {
+                        select: {
+                            name: true
+                        }
+                    },
+                    retirer: {
+                        select: {
+                            name: true
+                        }
+                    },
+                    branch: {
+                        select: {
+                            branchName: true
+                        }
                     }
                 }
-            }
+            })
+
+            // Update branch balance (add back the unspent amount)
+            const balanceBefore = branchBalance.currentBalance
+            const balanceAfter = balanceBefore.toNumber() + balance
+
+            await tx.branchBalance.update({
+                where: { branchId: imprest.branchId },
+                data: {
+                    currentBalance: balanceAfter,
+                    totalRetired: branchBalance.totalRetired.toNumber() + balance
+                }
+            })
+
+            // Create balance transaction record
+            await tx.branchBalanceTransaction.create({
+                data: {
+                    branchBalanceId: branchBalance.id,
+                    transactionType: 'IMPREST_RETIRED',
+                    amount: balance,
+                    balanceBefore: balanceBefore,
+                    balanceAfter: balanceAfter,
+                    reference: id,
+                    performedBy: user.userId,
+                    notes: `Imprest retired by ${imprest.staffName}. Amount spent: ${amountSpent}, Balance returned: ${balance}`
+                }
+            })
+
+            return updatedImprest
         })
 
         // Log action
@@ -104,8 +147,8 @@ export async function POST(
                 action: 'RETIRE_IMPREST',
                 module: 'IMPREST',
                 details: {
-                    imprestNo: updatedImprest.imprestNo,
-                    staffName: updatedImprest.staffName,
+                    imprestNo: result.imprestNo,
+                    staffName: result.staffName,
                     amountSpent: amountSpent.toString(),
                     balance: balance.toString()
                 },
@@ -113,7 +156,7 @@ export async function POST(
             }
         })
 
-        return NextResponse.json(updatedImprest)
+        return NextResponse.json(result)
 
     } catch (error) {
         console.error('Error retiring imprest:', error)

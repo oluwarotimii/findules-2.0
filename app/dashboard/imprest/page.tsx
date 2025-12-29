@@ -31,6 +31,13 @@ interface Imprest {
     branch: { branchName: string }
 }
 
+interface BranchBalance {
+    openingBalance: number
+    currentBalance: number
+    totalIssued: number
+    totalRetired: number
+}
+
 export default function ImprestPage() {
     const router = useRouter()
     const [imprest, setImprest] = useState<Imprest[]>([])
@@ -38,14 +45,47 @@ export default function ImprestPage() {
     const [loading, setLoading] = useState(true)
     const [activeTab, setActiveTab] = useState('ALL')
     const [searchTerm, setSearchTerm] = useState('')
+    const [branchBalance, setBranchBalance] = useState<BranchBalance | null>(null)
+    const [userRole, setUserRole] = useState<string>('')
 
     useEffect(() => {
+        // Get user role
+        const userData = localStorage.getItem('user')
+        if (userData) {
+            const user = JSON.parse(userData)
+            setUserRole(user.role)
+
+            // Fetch branch balance for branch admins
+            if (user.role === 'BRANCH_ADMIN') {
+                fetchBranchBalance(user.branchId)
+            }
+        }
         fetchImprest()
     }, [])
 
     useEffect(() => {
         filterImprest()
     }, [imprest, activeTab, searchTerm])
+
+    const fetchBranchBalance = async (branchId: string) => {
+        try {
+            const token = localStorage.getItem('token')
+            const res = await fetch(`/api/branch-balance/${branchId}`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            })
+            if (res.ok) {
+                const data = await res.json()
+                setBranchBalance({
+                    openingBalance: Number(data.openingBalance),
+                    currentBalance: Number(data.currentBalance),
+                    totalIssued: Number(data.totalIssued),
+                    totalRetired: Number(data.totalRetired)
+                })
+            }
+        } catch (error) {
+            console.error('Error fetching branch balance:', error)
+        }
+    }
 
     const fetchImprest = async () => {
         try {
@@ -132,11 +172,11 @@ export default function ImprestPage() {
 
     const getStatusBadge = (status: string) => {
         const badges = {
-            ISSUED: 'bg-blue-100 text-blue-800',
-            RETIRED: 'bg-green-100 text-green-800',
-            OVERDUE: 'bg-red-100 text-red-800'
+            ISSUED: 'bg-[color:var(--secondary)/.1] text-[color:var(--secondary)]',
+            RETIRED: 'bg-[color:var(--success)/.1] text-[color:var(--success)]',
+            OVERDUE: 'bg-[color:var(--destructive)/.1] text-[color:var(--destructive)]'
         }
-        return badges[status as keyof typeof badges] || 'bg-gray-100 text-gray-800'
+        return badges[status as keyof typeof badges] || 'bg-[color:var(--muted)/.1] text-[color:var(--muted)]'
     }
 
     const getStatusIcon = (status: string) => {
@@ -179,6 +219,31 @@ export default function ImprestPage() {
 
     return (
         <div className="text-[color:var(--card-foreground)]">
+            {/* Branch Balance Card for Branch Admins */}
+            {userRole === 'BRANCH_ADMIN' && branchBalance && (
+                <div className="mb-6 bg-gradient-to-r from-[color:var(--primary)] to-[color:var(--accent)] p-6 rounded-xl shadow-lg text-white">
+                    <h2 className="text-lg font-semibold mb-4">Branch Balance Overview</h2>
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                        <div>
+                            <p className="text-white/70 text-sm">Opening Balance</p>
+                            <p className="text-2xl font-bold">₦{branchBalance.openingBalance.toLocaleString()}</p>
+                        </div>
+                        <div>
+                            <p className="text-white/70 text-sm">Current Balance</p>
+                            <p className="text-2xl font-bold">₦{branchBalance.currentBalance.toLocaleString()}</p>
+                        </div>
+                        <div>
+                            <p className="text-white/70 text-sm">Total Issued</p>
+                            <p className="text-2xl font-bold">₦{branchBalance.totalIssued.toLocaleString()}</p>
+                        </div>
+                        <div>
+                            <p className="text-white/70 text-sm">Total Retired</p>
+                            <p className="text-2xl font-bold">₦{branchBalance.totalRetired.toLocaleString()}</p>
+                        </div>
+                    </div>
+                </div>
+            )}
+
             {/* Header */}
             <div className="flex items-center justify-between mb-8">
                 <div>
@@ -352,11 +417,10 @@ export default function ImprestPage() {
                                             </span>
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap">
-                                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                                                item.status === 'ISSUED' ? 'bg-[color:var(--primary)/.2] text-[color:var(--primary)]' :
+                                            <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${item.status === 'ISSUED' ? 'bg-[color:var(--primary)/.2] text-[color:var(--primary)]' :
                                                 item.status === 'RETIRED' ? 'bg-[color:var(--success)/.2] text-[color:var(--success)]' :
-                                                'bg-[color:var(--destructive)/.2] text-[color:var(--destructive)]'
-                                            }`}>
+                                                    'bg-[color:var(--destructive)/.2] text-[color:var(--destructive)]'
+                                                }`}>
                                                 {getStatusIcon(item.status)}
                                                 <span className="ml-1">{item.status}</span>
                                             </span>

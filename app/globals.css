@@ -2,35 +2,35 @@
 
 :root {
   --background: #ffffff;
-  --foreground: #171717;
+  --foreground: #1f2937;
 
-  /* Brand Color Palette with Better Contrast */
-  --teal: #177e89;
-  --teal-foreground: #ffffff;
-  --dark-teal: #084c61;
-  --dark-teal-foreground: #ffffff;
-  --scarlet-rush: #db3a34;
-  --scarlet-rush-foreground: #ffffff;
-  --golden-pollen: #e6b448; /* Adjusted for better contrast */
-  --golden-pollen-foreground: #000000;
-  --graphite: #323031;
-  --graphite-foreground: #ffffff;
+  /* Blue & White Color Palette */
+  --navy: #1e3a8a;
+  --navy-foreground: #ffffff;
+  --light-blue: #3b82f6;
+  --light-blue-foreground: #ffffff;
+  --sky-blue: #0ea5e9;
+  --sky-blue-foreground: #ffffff;
+  --white: #ffffff;
+  --white-foreground: #000000;
+  --blue-gray: #1e293b;
+  --blue-gray-foreground: #ffffff;
 
   /* Semantic Colors for Better Accessibility */
-  --primary: var(--dark-teal);
-  --primary-foreground: var(--dark-teal-foreground);
-  --secondary: var(--teal);
-  --secondary-foreground: var(--teal-foreground);
-  --accent: var(--scarlet-rush);
-  --accent-foreground: var(--scarlet-rush-foreground);
+  --primary: var(--navy);
+  --primary-foreground: var(--navy-foreground);
+  --secondary: var(--light-blue);
+  --secondary-foreground: var(--light-blue-foreground);
+  --accent: var(--sky-blue);
+  --accent-foreground: var(--sky-blue-foreground);
   --success: #10b981; /* Tailwind's emerald-500 */
   --success-foreground: #ffffff;
-  --warning: var(--golden-pollen);
-  --warning-foreground: var(--golden-pollen-foreground);
+  --warning: #f59e0b; /* Tailwind's amber-500 */
+  --warning-foreground: #ffffff;
   --destructive: #ef4444; /* Tailwind's red-500 */
   --destructive-foreground: #ffffff;
-  --muted: #9ca3af; /* Tailwind's gray-500 */
-  --muted-foreground: #6b7280; /* Tailwind's gray-600 */
+  --muted: #6b7280; /* Tailwind's gray-600 */
+  --muted-foreground: #9ca3af; /* Tailwind's gray-400 */
   --border: #e5e7eb; /* Tailwind's gray-200 */
   --input: #e5e7eb;
   --ring: var(--primary);
@@ -70,49 +70,49 @@
   --color-popover-foreground: var(--popover-foreground);
   --color-button: var(--button);
   --color-button-foreground: var(--button-foreground);
-  --font-sans: var(--font-geist-sans);
+  --font-sans: var(--font-raleway), var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
 }
 
 /* Dark mode theme */
 .dark {
-  --background: #0a0a0a;
-  --foreground: #ededed;
+  --background: #0f172a; /* Deep blue-gray */
+  --foreground: #f1f5f9; /* Light gray-blue */
 
-  /* Dark mode brand colors with better contrast */
-  --teal: #2db0b9; /* Lighter for dark mode */
-  --teal-foreground: #ffffff;
-  --dark-teal: #1a7d92; /* Adjusted for dark mode */
-  --dark-teal-foreground: #ffffff;
-  --scarlet-rush: #f85d59; /* Lighter for dark mode */
-  --scarlet-rush-foreground: #ffffff;
-  --golden-pollen: #f0c66e; /* Adjusted for dark mode */
-  --golden-pollen-foreground: #000000;
-  --graphite: #c2bfc1; /* Lighter for dark mode */
-  --graphite-foreground: #000000;
+  /* Dark mode blue & white colors */
+  --navy: #3b82f6; /* Lighter for dark mode */
+  --navy-foreground: #ffffff;
+  --light-blue: #60a5fa; /* Lighter for dark mode */
+  --light-blue-foreground: #ffffff;
+  --sky-blue: #7dd3fc; /* Lighter for dark mode */
+  --sky-blue-foreground: #ffffff;
+  --white: #1e293b; /* Darker for dark mode */
+  --white-foreground: #f8fafc;
+  --blue-gray: #334155; /* Adjusted for dark mode */
+  --blue-gray-foreground: #ffffff;
 
   /* Semantic Colors for Dark Mode */
-  --primary: var(--dark-teal);
-  --primary-foreground: var(--dark-teal-foreground);
-  --secondary: var(--teal);
-  --secondary-foreground: var(--teal-foreground);
-  --accent: var(--scarlet-rush);
-  --accent-foreground: var(--scarlet-rush-foreground);
+  --primary: var(--light-blue);
+  --primary-foreground: var(--light-blue-foreground);
+  --secondary: var(--sky-blue);
+  --secondary-foreground: var(--sky-blue-foreground);
+  --accent: #22d3ee; /* Cyan for contrast */
+  --accent-foreground: #ffffff;
   --success: #34d399; /* Tailwind's emerald-400 */
   --success-foreground: #000000;
-  --warning: var(--golden-pollen);
-  --warning-foreground: var(--golden-pollen-foreground);
+  --warning: #fbbf24; /* Tailwind's amber-400 */
+  --warning-foreground: #000000;
   --destructive: #f87171; /* Tailwind's red-400 */
   --destructive-foreground: #000000;
-  --muted: #6b7280; /* Tailwind's gray-600 */
-  --muted-foreground: #9ca3af; /* Tailwind's gray-400 */
-  --border: #374151; /* Tailwind's gray-700 */
-  --input: #374151;
+  --muted: #64748b; /* Tailwind's slate-500 */
+  --muted-foreground: #94a3b8; /* Tailwind's slate-400 */
+  --border: #334155; /* Tailwind's slate-700 */
+  --input: #334155;
   --ring: var(--primary);
 
-  --card: #1f2937; /* Tailwind's gray-800 */
+  --card: #1e293b; /* Tailwind's slate-800 */
   --card-foreground: var(--foreground);
-  --popover: #1f2937;
+  --popover: #1e293b;
   --popover-foreground: var(--foreground);
   --button: var(--primary);
   --button-foreground: var(--primary-foreground);
@@ -121,35 +121,35 @@
 /* Light mode as default */
 :root, .light {
   --background: #ffffff;
-  --foreground: #171717;
+  --foreground: #1f2937;
 
-  /* Brand Color Palette with Better Contrast */
-  --teal: #177e89;
-  --teal-foreground: #ffffff;
-  --dark-teal: #084c61;
-  --dark-teal-foreground: #ffffff;
-  --scarlet-rush: #db3a34;
-  --scarlet-rush-foreground: #ffffff;
-  --golden-pollen: #e6b448; /* Adjusted for better contrast */
-  --golden-pollen-foreground: #000000;
-  --graphite: #323031;
-  --graphite-foreground: #ffffff;
+  /* Blue & White Color Palette */
+  --navy: #1e3a8a;
+  --navy-foreground: #ffffff;
+  --light-blue: #3b82f6;
+  --light-blue-foreground: #ffffff;
+  --sky-blue: #0ea5e9;
+  --sky-blue-foreground: #ffffff;
+  --white: #ffffff;
+  --white-foreground: #000000;
+  --blue-gray: #1e293b;
+  --blue-gray-foreground: #ffffff;
 
   /* Semantic Colors for Better Accessibility */
-  --primary: var(--dark-teal);
-  --primary-foreground: var(--dark-teal-foreground);
-  --secondary: var(--teal);
-  --secondary-foreground: var(--teal-foreground);
-  --accent: var(--scarlet-rush);
-  --accent-foreground: var(--scarlet-rush-foreground);
+  --primary: var(--navy);
+  --primary-foreground: var(--navy-foreground);
+  --secondary: var(--light-blue);
+  --secondary-foreground: var(--light-blue-foreground);
+  --accent: var(--sky-blue);
+  --accent-foreground: var(--sky-blue-foreground);
   --success: #10b981; /* Tailwind's emerald-500 */
   --success-foreground: #ffffff;
-  --warning: var(--golden-pollen);
-  --warning-foreground: var(--golden-pollen-foreground);
+  --warning: #f59e0b; /* Tailwind's amber-500 */
+  --warning-foreground: #ffffff;
   --destructive: #ef4444; /* Tailwind's red-500 */
   --destructive-foreground: #ffffff;
-  --muted: #9ca3af; /* Tailwind's gray-500 */
-  --muted-foreground: #6b7280; /* Tailwind's gray-600 */
+  --muted: #6b7280; /* Tailwind's gray-600 */
+  --muted-foreground: #9ca3af; /* Tailwind's gray-400 */
   --border: #e5e7eb; /* Tailwind's gray-200 */
   --input: #e5e7eb;
   --ring: var(--primary);
@@ -166,7 +166,7 @@
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-raleway), sans-serif;
 }
 
 /* Hide number input spinner arrows */

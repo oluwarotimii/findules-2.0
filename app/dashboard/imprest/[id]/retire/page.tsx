@@ -139,11 +139,11 @@ export default function RetireImprestPage({ params }: { params: Promise<{ id: st
     if (!imprest) {
         return (
             <div className="text-center py-12">
-                <AlertCircle className="w-16 h-16 text-red-500 mx-auto mb-4" />
-                <p className="text-gray-500">{error || 'Imprest not found'}</p>
+                <AlertCircle className="w-16 h-16 text-[color:var(--destructive)] mx-auto mb-4" />
+                <p className="text-[color:var(--muted-foreground)]">{error || 'Imprest not found'}</p>
                 <button
                     onClick={() => router.back()}
-                    className="mt-4 px-6 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700"
+                    className="mt-4 px-6 py-2 bg-[color:var(--muted-foreground)] text-[color:var(--card-foreground)] rounded-lg hover:bg-[color:var(--muted-foreground)/.8]"
                 >
                     Go Back
                 </button>
@@ -158,22 +158,22 @@ export default function RetireImprestPage({ params }: { params: Promise<{ id: st
                 <div className="flex items-center gap-4">
                     <button
                         onClick={() => router.back()}
-                        className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                        className="p-2 hover:bg-[color:var(--muted)/.1] rounded-lg transition-colors"
                     >
-                        <ArrowLeft className="w-6 h-6 text-gray-600" />
+                        <ArrowLeft className="w-6 h-6 text-[color:var(--muted-foreground)]" />
                     </button>
                     <div>
-                        <h1 className="text-2xl font-bold text-gray-800 flex items-center">
-                            <Wallet className="w-7 h-7 mr-2 text-orange-600" />
+                        <h1 className="text-2xl font-bold text-[color:var(--card-foreground)] flex items-center">
+                            <Wallet className="w-7 h-7 mr-2 text-[color:var(--accent)]" />
                             Retire Imprest
                         </h1>
-                        <p className="text-gray-500 text-sm">Process imprest retirement and collect change</p>
+                        <p className="text-[color:var(--muted-foreground)] text-sm">Process imprest retirement and collect change</p>
                     </div>
                 </div>
             </div>
 
             {error && (
-                <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg flex items-center text-red-700">
+                <div className="mb-6 p-4 bg-[color:var(--destructive)/.1] border border-[color:var(--destructive)/.2] rounded-lg flex items-center text-[color:var(--destructive)]">
                     <AlertCircle className="w-5 h-5 mr-2" />
                     {error}
                 </div>
@@ -217,12 +217,12 @@ export default function RetireImprestPage({ params }: { params: Promise<{ id: st
 
             <form onSubmit={handleSubmit} className="space-y-6">
                 {/* Retirement Details */}
-                <div className="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
-                    <h2 className="text-lg font-semibold text-gray-800 mb-4">Retirement Details</h2>
+                <div className="bg-[color:var(--card)] p-6 rounded-xl shadow-sm border border-[color:var(--border)]">
+                    <h2 className="text-lg font-semibold text-[color:var(--card-foreground)] mb-4">Retirement Details</h2>
 
                     <div className="space-y-4">
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                            <label className="block text-sm font-medium text-[color:var(--card-foreground)] mb-1">
                                 Amount Spent (₦) *
                             </label>
                             <input
@@ -230,37 +230,37 @@ export default function RetireImprestPage({ params }: { params: Promise<{ id: st
                                 name="amountSpent"
                                 value={formData.amountSpent}
                                 onChange={handleChange}
-                                className="w-full p-2 text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                                className="w-full p-2 text-[color:var(--card-foreground)] border border-[color:var(--border)] rounded-lg focus:ring-2 focus:ring-[color:var(--accent)] focus:border-[color:var(--accent)]"
                                 required
                                 min="0"
                                 max={imprest.amount}
                                 step="0.01"
                             />
                             {formData.amountSpent > 0 && (
-                                <p className="text-sm text-gray-500 mt-1">
+                                <p className="text-sm text-[color:var(--muted-foreground)] mt-1">
                                     {formatCurrency(formData.amountSpent)}
                                 </p>
                             )}
                         </div>
 
                         {/* Balance Display */}
-                        <div className={`p-4 rounded-lg ${balance > 0 ? 'bg-green-50 border border-green-200' : balance < 0 ? 'bg-red-50 border border-red-200' : 'bg-gray-50 border border-gray-200'}`}>
-                            <label className="block text-sm font-semibold text-gray-700 mb-1">
+                        <div className={`p-4 rounded-lg ${balance > 0 ? 'bg-[color:var(--success)/.1] border border-[color:var(--success)/.2]' : balance < 0 ? 'bg-[color:var(--destructive)/.1] border border-[color:var(--destructive)/.2]' : 'bg-[color:var(--muted)/.1] border border-[color:var(--muted)/.2]'}`}>
+                            <label className="block text-sm font-semibold text-[color:var(--card-foreground)] mb-1">
                                 Balance / Change to Return
                             </label>
-                            <p className={`text-2xl font-bold ${balance > 0 ? 'text-green-600' : balance < 0 ? 'text-red-600' : 'text-gray-600'}`}>
+                            <p className={`text-2xl font-bold ${balance > 0 ? 'text-[color:var(--success)]' : balance < 0 ? 'text-[color:var(--destructive)]' : 'text-[color:var(--muted-foreground)]'}`}>
                                 {formatCurrency(balance)}
                             </p>
                             {balance > 0 && (
-                                <p className="text-sm text-green-700 mt-1">Staff should return this amount</p>
+                                <p className="text-sm text-[color:var(--success)] mt-1">Staff should return this amount</p>
                             )}
                             {balance < 0 && (
-                                <p className="text-sm text-red-700 mt-1">⚠️ Amount spent exceeds amount issued!</p>
+                                <p className="text-sm text-[color:var(--destructive)] mt-1">⚠️ Amount spent exceeds amount issued!</p>
                             )}
                         </div>
 
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                            <label className="block text-sm font-medium text-[color:var(--card-foreground)] mb-1">
                                 Date Retired *
                             </label>
                             <input
@@ -268,34 +268,34 @@ export default function RetireImprestPage({ params }: { params: Promise<{ id: st
                                 name="dateRetired"
                                 value={formData.dateRetired}
                                 onChange={handleChange}
-                                className="w-full p-2 text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                                className="w-full p-2 text-[color:var(--card-foreground)] border border-[color:var(--border)] rounded-lg focus:ring-2 focus:ring-[color:var(--accent)] focus:border-[color:var(--accent)]"
                                 required
                             />
                         </div>
 
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                            <label className="block text-sm font-medium text-[color:var(--card-foreground)] mb-1">
                                 Receipt Details
                             </label>
                             <textarea
                                 name="receipts"
                                 value={formData.receipts}
                                 onChange={handleChange}
-                                className="w-full p-3 text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                                className="w-full p-3 text-[color:var(--card-foreground)] border border-[color:var(--border)] rounded-lg focus:ring-2 focus:ring-[color:var(--accent)] focus:border-[color:var(--accent)]"
                                 rows={3}
                                 placeholder="List receipt numbers or details..."
                             />
                         </div>
 
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">
+                            <label className="block text-sm font-medium text-[color:var(--card-foreground)] mb-1">
                                 Retirement Notes
                             </label>
                             <textarea
                                 name="retirementNotes"
                                 value={formData.retirementNotes}
                                 onChange={handleChange}
-                                className="w-full p-3 text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                                className="w-full p-3 text-[color:var(--card-foreground)] border border-[color:var(--border)] rounded-lg focus:ring-2 focus:ring-[color:var(--accent)] focus:border-[color:var(--accent)]"
                                 rows={3}
                                 placeholder="Any additional notes about this retirement..."
                             />
@@ -308,14 +308,14 @@ export default function RetireImprestPage({ params }: { params: Promise<{ id: st
                     <button
                         type="button"
                         onClick={() => router.back()}
-                        className="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg font-semibold hover:bg-gray-50 transition-colors"
+                        className="px-6 py-3 border border-[color:var(--border)] text-[color:var(--card-foreground)] rounded-lg font-semibold hover:bg-[color:var(--muted)/.1] transition-colors"
                     >
                         Cancel
                     </button>
                     <button
                         type="submit"
                         disabled={loading || balance < 0}
-                        className={`flex items-center px-8 py-3 bg-green-600 text-white rounded-lg font-semibold shadow-lg hover:bg-green-700 transition-all transform hover:scale-105 ${(loading || balance < 0) ? 'opacity-70 cursor-not-allowed' : ''
+                        className={`flex items-center px-8 py-3 bg-[color:var(--success)] text-[color:var(--success-foreground)] rounded-lg font-semibold shadow-lg hover:bg-[color:var(--success)/.9] transition-all transform hover:scale-105 ${(loading || balance < 0) ? 'opacity-70 cursor-not-allowed' : ''
                             }`}
                     >
                         {loading ? (

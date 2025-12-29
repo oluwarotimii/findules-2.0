@@ -8,21 +8,22 @@ datasource db {
 }
 
 model User {
-  id               String            @id @default(cuid()) @db.VarChar(20)
-  name             String            @db.VarChar(100)
-  email            String            @unique @db.VarChar(100)
-  passwordHash     String            @db.Text
-  role             Role              @default(STAFF)
-  branchId         String            @db.VarChar(20)
-  status           Status            @default(ACTIVE)
-  createdAt        DateTime          @default(now())
-  updatedAt        DateTime          @updatedAt
-  auditLogs        AuditLog[]
-  cashRequisitions CashRequisition[]
-  fuelCoupons      FuelCoupon[]
-  imprestIssued    Imprest[]         @relation("ImprestIssuer")
-  imprestRetired   Imprest[]         @relation("ImprestRetirer")
-  branch           Branch            @relation(fields: [branchId], references: [branchId])
+  id                       String                     @id @default(cuid()) @db.VarChar(20)
+  name                     String                     @db.VarChar(100)
+  email                    String                     @unique @db.VarChar(100)
+  passwordHash             String                     @db.Text
+  role                     Role                       @default(STAFF)
+  branchId                 String                     @db.VarChar(20)
+  status                   Status                     @default(ACTIVE)
+  createdAt                DateTime                   @default(now())
+  updatedAt                DateTime                   @updatedAt
+  auditLogs                AuditLog[]
+  cashRequisitions         CashRequisition[]
+  fuelCoupons              FuelCoupon[]
+  imprestIssued            Imprest[]                  @relation("ImprestIssuer")
+  imprestRetired           Imprest[]                  @relation("ImprestRetirer")
+  branchBalanceTransactions BranchBalanceTransaction[]
+  branch                   Branch                     @relation(fields: [branchId], references: [branchId])
 
   @@index([email])
   @@index([branchId])
@@ -43,6 +44,7 @@ model Branch {
   imprest          Imprest[]
   reconciliations  Reconciliation[]
   users            User[]
+  branchBalance    BranchBalance?
 
   @@map("branches")
 }
@@ -224,8 +226,46 @@ model AuditLog {
   @@map("audit_logs")
 }
 
+model BranchBalance {
+  id              String                     @id @default(cuid()) @db.VarChar(20)
+  branchId        String                     @unique @db.VarChar(20)
+  openingBalance  Decimal                    @default(0.00) @db.Decimal(15, 2)
+  currentBalance  Decimal                    @default(0.00) @db.Decimal(15, 2)
+  totalIssued     Decimal                    @default(0.00) @db.Decimal(15, 2)
+  totalRetired    Decimal                    @default(0.00) @db.Decimal(15, 2)
+  lastUpdated     DateTime                   @updatedAt
+  createdAt       DateTime                   @default(now())
+  branch          Branch                     @relation(fields: [branchId], references: [branchId])
+  transactions    BranchBalanceTransaction[]
+
+  @@index([branchId])
+  @@map("branch_balances")
+}
+
+model BranchBalanceTransaction {
+  id              String        @id @default(cuid()) @db.VarChar(20)
+  branchBalanceId String        @db.VarChar(20)
+  transactionType String        @db.VarChar(50)
+  amount          Decimal       @db.Decimal(15, 2)
+  balanceBefore   Decimal       @db.Decimal(15, 2)
+  balanceAfter    Decimal       @db.Decimal(15, 2)
+  reference       String?       @db.VarChar(50)
+  performedBy     String        @db.VarChar(20)
+  notes           String?       @db.Text
+  createdAt       DateTime      @default(now())
+  branchBalance   BranchBalance @relation(fields: [branchBalanceId], references: [id])
+  user            User          @relation(fields: [performedBy], references: [id])
+
+  @@index([branchBalanceId])
+  @@index([transactionType])
+  @@index([createdAt])
+  @@index([performedBy])
+  @@map("branch_balance_transactions")
+}
+
 enum Role {
   STAFF
+  BRANCH_ADMIN
   MANAGER
 }
 

@@ -19,14 +19,23 @@ export async function POST(request: NextRequest) {
             include: { branch: true },
         })
 
+        console.log('Login attempt for:', email)
+        console.log('User found:', user ? 'Yes' : 'No')
+
         if (!user) {
+            console.log('User not found in database')
             return NextResponse.json(
                 { error: 'Invalid email or password' },
                 { status: 401 }
             )
         }
 
+        console.log('User status:', user.status)
+        console.log('User role:', user.role)
+        console.log('Password hash from DB:', user.passwordHash.substring(0, 20) + '...')
+
         if (user.status !== 'ACTIVE') {
+            console.log('User account is inactive')
             return NextResponse.json(
                 { error: 'Account is inactive. Please contact administrator.' },
                 { status: 403 }
@@ -34,8 +43,10 @@ export async function POST(request: NextRequest) {
         }
 
         const isValidPassword = await verifyPassword(password, user.passwordHash)
+        console.log('Password valid:', isValidPassword)
 
         if (!isValidPassword) {
+            console.log('Password verification failed')
             return NextResponse.json(
                 { error: 'Invalid email or password' },
                 { status: 401 }

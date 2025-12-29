@@ -122,34 +122,90 @@ export async function POST(request: NextRequest) {
             )
         }
 
+        // Check branch balance
+        const branchBalance = await prisma.branchBalance.findUnique({
+            where: { branchId: user.branchId }
+        })
+
+        if (!branchBalance) {
+            return NextResponse.json(
+                { error: 'Branch balance not initialized. Please contact administrator.' },
+                { status: 400 }
+            )
+        }
+
+        // Check if sufficient balance
+        if (branchBalance.currentBalance.toNumber() < body.amount) {
+            return NextResponse.json(
+                {
+                    error: 'Insufficient branch balance',
+                    availableBalance: branchBalance.currentBalance.toString(),
+                    requestedAmount: body.amount.toString()
+                },
+                { status: 400 }
+            )
+        }
+
         // Generate imprest number
         const count = await prisma.imprest.count()
         const imprestNo = generateImprestNumber(count)
 
-        const imprest = await prisma.imprest.create({
-            data: {
-                imprestNo,
-                staffName: body.staffName,
-                amount: body.amount,
-                category: body.category as ImprestCategory,
-                purpose: body.purpose,
-                dateIssued: body.dateIssued ? new Date(body.dateIssued) : new Date(),
-                issuedBy: user.userId,
-                branchId: user.branchId,
-                status: 'ISSUED'
-            },
-            include: {
-                issuer: {
-                    select: {
-                        name: true
-                    }
+        // Create imprest and update branch balance in a transaction
+        const result = await prisma.$transaction(async (tx) => {
+            // Create imprest
+            const imprest = await tx.imprest.create({
+                data: {
+                    imprestNo,
+                    staffName: body.staffName,
+                    amount: body.amount,
+                    category: body.category as ImprestCategory,
+                    purpose: body.purpose,
+                    dateIssued: body.dateIssued ? new Date(body.dateIssued) : new Date(),
+                    issuedBy: user.userId,
+                    branchId: user.branchId,
+                    status: 'ISSUED'
                 },
-                branch: {
-                    select: {
-                        branchName: true
+                include: {
+                    issuer: {
+                        select: {
+                            name: true
+                        }
+                    },
+                    branch: {
+                        select: {
+                            branchName: true
+                        }
                     }
                 }
-            }
+            })
+
+            // Update branch balance
+            const balanceBefore = branchBalance.currentBalance
+            const balanceAfter = balanceBefore.toNumber() - Number(body.amount)
+
+            const updatedBranchBalance = await tx.branchBalance.update({
+                where: { branchId: user.branchId },
+                data: {
+                    currentBalance: balanceAfter,
+                    totalIssued: branchBalance.totalIssued.toNumber() + Number(body.amount)
+                }
+            })
+
+            // Create balance transaction record
+            await tx.branchBalanceTransaction.create({
+                data: {
+                    branchBalanceId: branchBalance.id,
+                    transactionType: 'IMPREST_ISSUED',
+                    amount: body.amount,
+                    balanceBefore: balanceBefore,
+                    balanceAfter: balanceAfter,
+                    reference: imprestNo,
+                    performedBy: user.userId,
+                    notes: `Imprest issued to ${body.staffName}`
+                }
+            })
+
+            return { imprest, updatedBranchBalance }
         })
 
         // Log action
@@ -158,12 +214,17 @@ export async function POST(request: NextRequest) {
                 userId: user.userId,
                 action: 'CREATE_IMPREST',
                 module: 'IMPREST',
-                details: { imprestNo: imprest.imprestNo, staffName: imprest.staffName, amount: imprest.amount.toString() },
+                details: {
+                    imprestNo: result.imprest.imprestNo,
+                    staffName: result.imprest.staffName,
+                    amount: result.imprest.amount.toString(),
+                    branchBalance: result.updatedBranchBalance.currentBalance.toString()
+                },
                 ipAddress: request.headers.get('x-forwarded-for') || 'unknown'
             }
         })
 
-        return NextResponse.json(imprest)
+        return NextResponse.json(result.imprest)
 
     } catch (error) {
         console.error('Error creating imprest:', error)

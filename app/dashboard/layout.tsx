@@ -84,18 +84,19 @@ export default function DashboardLayout({
     }
 
     const isManager = user?.role === 'MANAGER'
+    const isBranchAdmin = user?.role === 'BRANCH_ADMIN'
 
     const navigation = [
         { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard, roles: ['STAFF', 'MANAGER'] },
         // { name: 'Cash Requisitions', href: '/dashboard/requisitions', icon: Banknote, roles: ['STAFF', 'MANAGER'] },
         { name: 'Reconciliations', href: '/dashboard/reconciliations', icon: ClipboardCheck, roles: ['STAFF', 'MANAGER'] },
         { name: 'Fuel Coupons', href: '/dashboard/fuel-coupons', icon: Fuel, roles: ['STAFF', 'MANAGER'] },
-        { name: 'Imprest', href: '/dashboard/imprest', icon: Wallet, roles: ['STAFF', 'MANAGER'] },
+        { name: 'Imprest', href: '/dashboard/imprest', icon: Wallet, roles: ['STAFF', 'MANAGER', 'BRANCH_ADMIN'] },
         { name: 'Cashiers', href: '/dashboard/cashiers', icon: Users, roles: ['MANAGER'] },
         { name: 'Branches', href: '/dashboard/branches', icon: Building, roles: ['MANAGER'] },
         { name: 'Reports', href: '/dashboard/reports', icon: BarChart3, roles: ['MANAGER'] },
         { name: 'Audit Logs', href: '/dashboard/audit-logs', icon: BarChart3, roles: ['MANAGER'] },
-        // { name: 'Users', href: '/dashboard/users', icon: UserCog, roles: ['MANAGER'] },
+        { name: 'Users', href: '/dashboard/users', icon: UserCog, roles: ['MANAGER'] },
         { name: 'Settings', href: '/dashboard/settings', icon: Settings, roles: ['MANAGER'] },
     ]
 
@@ -115,7 +116,7 @@ export default function DashboardLayout({
                     <div className="mb-8 px-3 flex justify-between items-center">
                         <div>
                             <h1 className="text-2xl font-bold text-[color:var(--primary-foreground)]">Findules</h1>
-                            <p className="text-[color:var(--primary-foreground)/.7] text-sm mt-1">Financial Operations</p>
+                            <p className="text-[color:var(--primary-foreground)] text-sm mt-1">Financial Operations</p>
                         </div>
                         <button
                             onClick={() => setSidebarOpen(false)}
@@ -128,12 +129,12 @@ export default function DashboardLayout({
                     {/* User Info */}
                     <div className="mb-6 px-3 py-3 bg-[color:var(--primary)/.8] rounded-lg">
                         <p className="text-[color:var(--primary-foreground)] font-semibold truncate">{user?.name}</p>
-                        <p className="text-[color:var(--primary-foreground)/.7] text-sm truncate">{user?.email}</p>
+                        <p className="text-[color:var(--primary-foreground)] text-sm truncate">{user?.email}</p>
                         <div className="mt-2 flex items-center gap-2 flex-wrap">
-                            <span className="px-2 py-1 bg-[color:var(--primary)/.7] text-[color:var(--primary-foreground)/.9] text-xs rounded">
+                            <span className="px-2 py-1 bg-[color:var(--primary-foreground)] text-[color:var(--primary-foreground)/.9] text-xs rounded">
                                 {user?.role}
                             </span>
-                            <span className="px-2 py-1 bg-[color:var(--primary)/.7] text-[color:var(--primary-foreground)/.9] text-xs rounded">
+                            <span className="px-2 py-1 bg-[color:var(--primary)] text-[color:var(--primary-foreground)] text-xs rounded">
                                 {user?.branchName}
                             </span>
                         </div>
@@ -145,7 +146,7 @@ export default function DashboardLayout({
                             <Link
                                 key={item.name}
                                 href={item.href}
-                                className="flex items-center px-3 py-2.5 text-[color:var(--primary-foreground)] hover:bg-[color:var(--primary)/.8] rounded-lg transition-colors group"
+                                className="flex items-center px-3 py-2.5 text-[color:var(--primary-foreground)] hover:bg-[color:var(--primary)] col rounded-lg transition-colors group"
                             >
                                 <item.icon className="w-5 h-5 mr-3" />
                                 <span className="font-medium">{item.name}</span>

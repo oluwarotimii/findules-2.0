@@ -78,9 +78,9 @@ export default function ReconciliationsPage() {
     }
 
     const getVarianceColor = (variance: number) => {
-        if (Math.abs(variance) < 100) return 'text-green-600 bg-green-50'
-        if (variance < 0) return 'text-red-600 bg-red-50'
-        return 'text-yellow-600 bg-yellow-50'
+        if (Math.abs(variance) < 100) return 'text-[color:var(--success)] bg-[color:var(--success)/.1]'
+        if (variance < 0) return 'text-[color:var(--destructive)] bg-[color:var(--destructive)/.1]'
+        return 'text-[color:var(--warning)] bg-[color:var(--warning)/.1]'
     }
 
     const filteredReconciliations = reconciliations.filter(rec =>
@@ -132,27 +132,27 @@ export default function ReconciliationsPage() {
             {/* Header */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
-                    <h1 className="text-2xl font-bold text-gray-800">Reconciliations</h1>
-                    <p className="text-gray-500 text-sm">Manage and view daily cashier reconciliations</p>
+                    <h1 className="text-2xl font-bold text-[color:var(--card-foreground)]">Reconciliations</h1>
+                    <p className="text-[color:var(--muted-foreground)] text-sm">Manage and view daily cashier reconciliations</p>
                 </div>
                 <div className="flex gap-2">
                     <button
                         onClick={() => handleExport('csv')}
-                        className="flex items-center px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
+                        className="flex items-center px-4 py-2 border border-[color:var(--border)] text-[color:var(--card-foreground)] rounded-lg hover:bg-[color:var(--muted)/.1] transition-colors"
                     >
                         <Download className="w-4 h-4 mr-2" />
                         CSV
                     </button>
                     <button
                         onClick={() => handleExport('excel')}
-                        className="flex items-center px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50"
+                        className="flex items-center px-4 py-2 border border-[color:var(--border)] text-[color:var(--card-foreground)] rounded-lg hover:bg-[color:var(--muted)/.1] transition-colors"
                     >
                         <Download className="w-4 h-4 mr-2" />
                         Excel
                     </button>
                     <Link
                         href="/dashboard/reconciliations/create"
-                        className="flex items-center justify-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                        className="flex items-center justify-center px-4 py-2 bg-[color:var(--primary)] text-[color:var(--primary-foreground)] rounded-lg hover:bg-[color:var(--primary)/.9] transition-colors"
                     >
                         <Plus className="w-5 h-5 mr-2" />
                         New Reconciliation
@@ -162,86 +162,86 @@ export default function ReconciliationsPage() {
 
             {/* Variance Dashboard */}
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-                <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
+                <div className="bg-[color:var(--card)] p-4 rounded-xl shadow-sm border border-[color:var(--border)]">
                     <div className="flex items-center justify-between mb-2">
-                        <span className="text-sm text-gray-500">Total Records</span>
-                        <FileText className="w-4 h-4 text-blue-500" />
+                        <span className="text-sm text-[color:var(--muted-foreground)]">Total Records</span>
+                        <FileText className="w-4 h-4 text-[color:var(--primary)]" />
                     </div>
-                    <p className="text-2xl font-bold text-gray-800">{totalReconciliations}</p>
+                    <p className="text-2xl font-bold text-[color:var(--card-foreground)]">{totalReconciliations}</p>
                 </div>
-                <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
+                <div className="bg-[color:var(--card)] p-4 rounded-xl shadow-sm border border-[color:var(--border)]">
                     <div className="flex items-center justify-between mb-2">
-                        <span className="text-sm text-gray-500">Net Variance</span>
-                        <div className={`p-1 rounded ${totalVariance >= 0 ? 'bg-green-100 text-green-600' : 'bg-red-100 text-red-600'}`}>
+                        <span className="text-sm text-[color:var(--muted-foreground)]">Net Variance</span>
+                        <div className={`p-1 rounded ${totalVariance >= 0 ? 'bg-[color:var(--success)/.1] text-[color:var(--success)]' : 'bg-[color:var(--destructive)/.1] text-[color:var(--destructive)]'}`}>
                             {totalVariance >= 0 ? <ArrowUpRight className="w-3 h-3" /> : <ArrowDownRight className="w-3 h-3" />}
                         </div>
                     </div>
-                    <p className={`text-2xl font-bold ${totalVariance >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                    <p className={`text-2xl font-bold ${totalVariance >= 0 ? 'text-[color:var(--success)]' : 'text-[color:var(--destructive)]'}`}>
                         {formatCurrency(totalVariance)}
                     </p>
                 </div>
-                <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
+                <div className="bg-[color:var(--card)] p-4 rounded-xl shadow-sm border border-[color:var(--border)]">
                     <div className="flex items-center justify-between mb-2">
-                        <span className="text-sm text-gray-500">Balanced</span>
-                        <CheckCircle className="w-4 h-4 text-green-500" />
+                        <span className="text-sm text-[color:var(--muted-foreground)]">Balanced</span>
+                        <CheckCircle className="w-4 h-4 text-[color:var(--success)]" />
                     </div>
-                    <p className="text-2xl font-bold text-gray-800">{balancedCount}</p>
+                    <p className="text-2xl font-bold text-[color:var(--card-foreground)]">{balancedCount}</p>
                 </div>
-                <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100">
+                <div className="bg-[color:var(--card)] p-4 rounded-xl shadow-sm border border-[color:var(--border)]">
                     <div className="flex items-center justify-between mb-2">
-                        <span className="text-sm text-gray-500">Issues / Review</span>
-                        <AlertCircle className="w-4 h-4 text-orange-500" />
+                        <span className="text-sm text-[color:var(--muted-foreground)]">Issues / Review</span>
+                        <AlertCircle className="w-4 h-4 text-[color:var(--warning)]" />
                     </div>
-                    <p className="text-2xl font-bold text-gray-800">{issueCount}</p>
+                    <p className="text-2xl font-bold text-[color:var(--card-foreground)]">{issueCount}</p>
                 </div>
             </div>
 
             {/* Filters */}
-            <div className="bg-white p-4 rounded-xl shadow-sm border border-gray-100 flex flex-col md:flex-row gap-4">
+            <div className="bg-[color:var(--card)] p-4 rounded-xl shadow-sm border border-[color:var(--border)] flex flex-col md:flex-row gap-4">
                 <div className="relative flex-1">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-5 h-5" />
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[color:var(--muted-foreground)] w-5 h-5" />
                     <input
                         type="text"
                         placeholder="Search by cashier or serial number..."
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
-                        className="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="w-full pl-10 pr-4 py-2 border border-[color:var(--border)] rounded-lg focus:outline-none focus:ring-2 focus:ring-[color:var(--primary)] bg-[color:var(--card)] text-[color:var(--card-foreground)]"
                     />
                 </div>
-                <button className="flex items-center px-4 py-2 border border-gray-200 rounded-lg hover:bg-gray-50 text-gray-600">
+                <button className="flex items-center px-4 py-2 border border-[color:var(--border)] rounded-lg hover:bg-[color:var(--muted)/.1] text-[color:var(--card-foreground)]">
                     <Filter className="w-5 h-5 mr-2" />
                     Filter
                 </button>
             </div>
 
             {/* Table */}
-            <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+            <div className="bg-[color:var(--card)] rounded-xl shadow-sm border border-[color:var(--border)] overflow-hidden">
                 <div className="overflow-x-auto">
                     <table className="w-full text-left">
-                        <thead className="bg-gray-50 border-b border-gray-100">
+                        <thead className="bg-[color:var(--muted)/.1] border-b border-[color:var(--border)]">
                             <tr>
-                                <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase">Serial No</th>
-                                <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase">Date</th>
-                                <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase">Cashier</th>
-                                <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase text-right">Total Sales</th>
-                                <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase text-right">Closing Bal</th>
-                                <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase text-right">Variance</th>
-                                <th className="px-6 py-4 text-xs font-semibold text-gray-500 uppercase">Status</th>
+                                <th className="px-6 py-4 text-xs font-semibold text-[color:var(--muted-foreground)] uppercase">Serial No</th>
+                                <th className="px-6 py-4 text-xs font-semibold text-[color:var(--muted-foreground)] uppercase">Date</th>
+                                <th className="px-6 py-4 text-xs font-semibold text-[color:var(--muted-foreground)] uppercase">Cashier</th>
+                                <th className="px-6 py-4 text-xs font-semibold text-[color:var(--muted-foreground)] uppercase text-right">Total Sales</th>
+                                <th className="px-6 py-4 text-xs font-semibold text-[color:var(--muted-foreground)] uppercase text-right">Closing Bal</th>
+                                <th className="px-6 py-4 text-xs font-semibold text-[color:var(--muted-foreground)] uppercase text-right">Variance</th>
+                                <th className="px-6 py-4 text-xs font-semibold text-[color:var(--muted-foreground)] uppercase">Status</th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-gray-100">
+                        <tbody className="divide-y divide-[color:var(--border)]">
                             {loading ? (
                                 <tr>
-                                    <td colSpan={7} className="px-6 py-8 text-center text-gray-500">
+                                    <td colSpan={7} className="px-6 py-8 text-center text-[color:var(--muted-foreground)]">
                                         <div className="flex justify-center items-center">
-                                            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600 mr-2"></div>
+                                            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-[color:var(--primary)] mr-2"></div>
                                             Loading data...
                                         </div>
                                     </td>
                                 </tr>
                             ) : filteredReconciliations.length === 0 ? (
                                 <tr>
-                                    <td colSpan={7} className="px-6 py-8 text-center text-gray-500">
+                                    <td colSpan={7} className="px-6 py-8 text-center text-[color:var(--muted-foreground)]">
                                         No reconciliations found.
                                     </td>
                                 </tr>
@@ -250,22 +250,22 @@ export default function ReconciliationsPage() {
                                     <tr
                                         key={rec.serialNumber}
                                         onClick={() => { setSelectedRec(rec); setShowModal(true); }}
-                                        className="hover:bg-gray-50 transition-colors cursor-pointer"
+                                        className="hover:bg-[color:var(--muted)/.1] transition-colors cursor-pointer"
                                     >
                                         <td className="px-6 py-4">
-                                            <span className="font-medium text-blue-600">{rec.serialNumber}</span>
+                                            <span className="font-medium text-[color:var(--primary)]">{rec.serialNumber}</span>
                                         </td>
                                         <td className="px-6 py-4">
-                                            <div className="text-sm font-medium text-gray-900">{formatDate(rec.date)}</div>
+                                            <div className="text-sm font-medium text-[color:var(--card-foreground)]">{formatDate(rec.date)}</div>
                                         </td>
                                         <td className="px-6 py-4">
-                                            <div className="text-sm text-gray-900">{rec.cashierName}</div>
-                                            <div className="text-xs text-gray-500">{rec.branch.branchName}</div>
+                                            <div className="text-sm text-[color:var(--card-foreground)]">{rec.cashierName}</div>
+                                            <div className="text-xs text-[color:var(--muted-foreground)]">{rec.branch.branchName}</div>
                                         </td>
-                                        <td className="px-6 py-4 text-right font-medium text-gray-900">
+                                        <td className="px-6 py-4 text-right font-medium text-[color:var(--card-foreground)]">
                                             {formatCurrency(rec.actualTotalSales)}
                                         </td>
-                                        <td className="px-6 py-4 text-right font-medium text-gray-900">
+                                        <td className="px-6 py-4 text-right font-medium text-[color:var(--card-foreground)]">
                                             {formatCurrency(rec.actualClosingBalance)}
                                         </td>
                                         <td className="px-6 py-4 text-right">
@@ -275,12 +275,12 @@ export default function ReconciliationsPage() {
                                         </td>
                                         <td className="px-6 py-4">
                                             {Math.abs(rec.overageShortage) < 100 ? (
-                                                <span className="inline-flex items-center text-green-600 text-xs font-medium">
+                                                <span className="inline-flex items-center text-[color:var(--success)] text-xs font-medium">
                                                     <CheckCircle className="w-4 h-4 mr-1" />
                                                     Balanced
                                                 </span>
                                             ) : (
-                                                <span className="inline-flex items-center text-red-600 text-xs font-medium">
+                                                <span className="inline-flex items-center text-[color:var(--destructive)] text-xs font-medium">
                                                     <AlertCircle className="w-4 h-4 mr-1" />
                                                     Review
                                                 </span>
