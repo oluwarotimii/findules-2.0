@@ -6,7 +6,7 @@ import bcrypt from 'bcryptjs'
 // GET: Get specific user
 export async function GET(
     request: NextRequest,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
         const token = request.headers.get('Authorization')?.split(' ')[1]
@@ -24,7 +24,7 @@ export async function GET(
             return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
         }
 
-        const { id } = params
+        const { id } = await params
 
         const targetUser = await prisma.user.findUnique({
             where: { id },
@@ -64,7 +64,7 @@ export async function GET(
 // PUT: Update user
 export async function PUT(
     request: NextRequest,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
         const token = request.headers.get('Authorization')?.split(' ')[1]
@@ -82,7 +82,7 @@ export async function PUT(
             return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
         }
 
-        const { id } = params
+        const { id } = await params
         const body = await request.json()
 
         // Check if user exists
@@ -185,7 +185,7 @@ export async function PUT(
 // DELETE: Delete user
 export async function DELETE(
     request: NextRequest,
-    { params }: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
     try {
         const token = request.headers.get('Authorization')?.split(' ')[1]
@@ -203,7 +203,7 @@ export async function DELETE(
             return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
         }
 
-        const { id } = params
+        const { id } = await params
 
         // Cannot delete self
         if (id === user.id) {
