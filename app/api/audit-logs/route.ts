@@ -22,7 +22,7 @@ export async function GET(request: NextRequest) {
 
         const { searchParams } = new URL(request.url)
         const module = searchParams.get('module')
-        const userId = searchParams.get('userId')
+        const id = searchParams.get('id')
         const startDate = searchParams.get('startDate')
         const endDate = searchParams.get('endDate')
 
@@ -35,8 +35,8 @@ export async function GET(request: NextRequest) {
         }
 
         // User ID filter
-        if (userId) {
-            where.userId = userId
+        if (id) {
+            where.id = id
         }
 
         // Date range filter

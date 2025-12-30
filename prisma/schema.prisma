@@ -59,13 +59,13 @@ model CashRequisition {
   requestedBy      String              @db.VarChar(100)
   dateNeeded       DateTime            @db.Date
   dateRecorded     DateTime            @default(now())
-  recordedBy       String              @db.VarChar(20)
+  recordedBy       String              @db.VarChar(30)
   status           RequisitionStatus   @default(RECORDED)
   paymentDate      DateTime?           @db.Date
   paymentMethod    PaymentMethod?
   paymentReference String?             @db.VarChar(50)
   amountPaid       Decimal?            @db.Decimal(15, 2)
-  paidBy           String?             @db.VarChar(20)
+  paidBy           String?             @db.VarChar(30)
   branchId         String              @db.VarChar(20)
   branch           Branch              @relation(fields: [branchId], references: [branchId])
   recordedByUser   User                @relation(fields: [recordedBy], references: [id])
@@ -116,12 +116,12 @@ model Reconciliation {
   supervisorSignature        String?           @db.VarChar(255)
   supervisorComments         String?           @db.Text
   submittedAt                DateTime          @default(now())
-  submittedBy                String            @db.VarChar(20)
+  submittedBy                String            @db.VarChar(30)
   approvalStatus             ApprovalStatus    @default(SUBMITTED)
   createdAt                  DateTime          @default(now())
   updatedAt                  DateTime          @updatedAt
   createdByIp                String?           @db.VarChar(45)
-  lastModifiedBy             String?           @db.VarChar(20)
+  lastModifiedBy             String?           @db.VarChar(30)
   branch                     Branch            @relation(fields: [branchId], references: [branchId])
   cashier                    Cashier           @relation(fields: [cashierId], references: [id])
 
@@ -159,7 +159,7 @@ model FuelCoupon {
   fuelType        FuelType
   quantityLitres  Decimal  @db.Decimal(10, 2)
   estimatedAmount Decimal  @db.Decimal(15, 2)
-  createdBy       String   @db.VarChar(20)
+  createdBy       String   @db.VarChar(30)
   createdAt       DateTime @default(now())
   branchId        String   @db.VarChar(20)
   pdfGenerated    Boolean  @default(false)
@@ -184,14 +184,14 @@ model Imprest {
   category        ImprestCategory
   purpose         String          @db.Text
   dateIssued      DateTime        @db.Date
-  issuedBy        String          @db.VarChar(20)
+  issuedBy        String          @db.VarChar(30)
   status          ImprestStatus   @default(ISSUED)
   dateRetired     DateTime?       @db.Date
   amountSpent     Decimal?        @db.Decimal(15, 2)
   balance         Decimal?        @db.Decimal(15, 2)
   receipts        String?         @db.LongText
   retirementNotes String?         @db.Text
-  retiredBy       String?         @db.VarChar(20)
+  retiredBy       String?         @db.VarChar(30)
   branchId        String          @db.VarChar(20)
   createdAt       DateTime        @default(now())
   updatedAt       DateTime        @updatedAt
@@ -227,7 +227,7 @@ model AuditLog {
 }
 
 model BranchBalance {
-  id              String                     @id @default(cuid()) @db.VarChar(20)
+  id              String                     @id @default(cuid()) @db.VarChar(30)
   branchId        String                     @unique @db.VarChar(20)
   openingBalance  Decimal                    @default(0.00) @db.Decimal(15, 2)
   currentBalance  Decimal                    @default(0.00) @db.Decimal(15, 2)
@@ -243,14 +243,14 @@ model BranchBalance {
 }
 
 model BranchBalanceTransaction {
-  id              String        @id @default(cuid()) @db.VarChar(20)
-  branchBalanceId String        @db.VarChar(20)
+  id              String        @id @default(cuid()) @db.VarChar(30)
+  branchBalanceId String        @db.VarChar(30)
   transactionType String        @db.VarChar(50)
   amount          Decimal       @db.Decimal(15, 2)
   balanceBefore   Decimal       @db.Decimal(15, 2)
   balanceAfter    Decimal       @db.Decimal(15, 2)
   reference       String?       @db.VarChar(50)
-  performedBy     String        @db.VarChar(20)
+  performedBy     String        @db.VarChar(30)
   notes           String?       @db.Text
   createdAt       DateTime      @default(now())
   branchBalance   BranchBalance @relation(fields: [branchBalanceId], references: [id])

@@ -123,6 +123,18 @@ export async function POST(request: NextRequest) {
             )
         }
 
+        // Verify that the user exists before creating the fuel coupon
+        const verifiedUser = await prisma.user.findUnique({
+            where: { id: user.id }
+        })
+
+        if (!verifiedUser) {
+            return NextResponse.json(
+                { error: 'User not found. Please log in again.' },
+                { status: 401 }
+            )
+        }
+
         // Generate document code
         const count = await prisma.fuelCoupon.count()
         const documentCode = generateFuelCouponCode(count)
@@ -140,7 +152,7 @@ export async function POST(request: NextRequest) {
                 fuelType: body.fuelType,
                 quantityLitres: body.quantityLitres,
                 estimatedAmount: body.estimatedAmount || 0,
-                createdBy: user.userId,
+                createdBy: user.id,
                 branchId: user.branchId
             },
             include: {
@@ -158,15 +170,20 @@ export async function POST(request: NextRequest) {
         })
 
         // Log action
-        await prisma.auditLog.create({
-            data: {
-                userId: user.userId,
-                action: 'CREATE_FUEL_COUPON',
-                module: 'FUEL_COUPON',
-                details: { documentCode: fuelCoupon.documentCode, staffName: fuelCoupon.staffName },
-                ipAddress: request.headers.get('x-forwarded-for') || 'unknown'
-            }
-        })
+        try {
+            await prisma.auditLog.create({
+                data: {
+                    userId: user.id,
+                    action: 'CREATE_FUEL_COUPON',
+                    module: 'FUEL_COUPON',
+                    details: { documentCode: fuelCoupon.documentCode, staffName: fuelCoupon.staffName },
+                    ipAddress: request.headers.get('x-forwarded-for') || 'unknown'
+                }
+            })
+        } catch (auditError) {
+            console.error('Failed to create audit log:', auditError)
+            // Don't fail the fuel coupon creation if audit log creation fails
+        }
 
         return NextResponse.json(fuelCoupon)
 

@@ -21,7 +21,7 @@ export async function GET(
             return NextResponse.json({ error: 'Invalid token' }, { status: 401 })
         }
 
-        const { branchId } = params
+        const { branchId } = await params
 
         // Role-based access control
         if (user.role === 'BRANCH_ADMIN' && user.branchId !== branchId) {
@@ -95,7 +95,7 @@ export async function PUT(
             return NextResponse.json({ error: 'Forbidden - Manager access required' }, { status: 403 })
         }
 
-        const { branchId } = params
+        const { branchId } = await params
         const body = await request.json()
 
         // Validation
@@ -130,12 +130,38 @@ export async function PUT(
         const balanceBefore = existingBalance.currentBalance
         const balanceAfter = balanceBefore.toNumber() + amount
 
+        // Verify that the user exists before updating the branch balance
+        const verifiedUser = await prisma.user.findUnique({
+            where: { id: user.id }
+        })
+
+        if (!verifiedUser) {
+            return NextResponse.json(
+                { error: 'User not found. Please log in again.' },
+                { status: 401 }
+            )
+        }
+
         // Update balance
-        await prisma.branchBalance.update({
+        const updatedBalance = await prisma.branchBalance.update({
             where: { branchId },
             data: {
                 currentBalance: parseDecimal(balanceAfter),
-                openingBalance: parseDecimal(existingBalance.openingBalance.toNumber() + amount)
+                openingBalance: parseDecimal(existingBalance.openingBalance.toNumber() + amount),
+                lastUpdated: new Date(),
+            }
+        })
+
+        // Create transaction record
+        await prisma.branchBalanceTransaction.create({
+            data: {
+                branchBalanceId: existingBalance.id,
+                transactionType: 'TOP_UP',
+                amount: parseDecimal(amount),
+                balanceBefore: balanceBefore,
+                balanceAfter: parseDecimal(balanceAfter),
+                performedBy: user.id,
+                notes: body.notes || 'Balance top up by manager'
             }
         })
 
@@ -159,34 +185,26 @@ export async function PUT(
             )
         }
 
-        // Create transaction record
-        await prisma.branchBalanceTransaction.create({
-            data: {
-                branchBalanceId: existingBalance.id,
-                transactionType: 'TOP_UP',
-                amount: parseDecimal(amount),
-                balanceBefore: balanceBefore,
-                balanceAfter: parseDecimal(balanceAfter),
-                performedBy: user.userId,
-                notes: body.notes || 'Balance top up by manager'
-            }
-        })
-
         // Log action
-        await prisma.auditLog.create({
-            data: {
-                userId: user.userId,
-                action: 'TOP_UP_BRANCH_BALANCE',
-                module: 'BRANCH_BALANCE',
-                details: {
-                    branchId,
-                    amount: amount.toString(),
-                    balanceBefore: balanceBefore.toString(),
-                    balanceAfter: balanceAfter.toString()
-                },
-                ipAddress: request.headers.get('x-forwarded-for') || 'unknown'
-            }
-        })
+        try {
+            await prisma.auditLog.create({
+                data: {
+                    userId: user.id,
+                    action: 'TOP_UP_BRANCH_BALANCE',
+                    module: 'BRANCH_BALANCE',
+                    details: {
+                        branchId,
+                        amount: amount.toString(),
+                        balanceBefore: balanceBefore.toString(),
+                        balanceAfter: balanceAfter.toString()
+                    },
+                    ipAddress: request.headers.get('x-forwarded-for') || 'unknown'
+                }
+            })
+        } catch (auditError) {
+            console.error('Failed to create audit log:', auditError)
+            // Don't fail the branch balance update if audit log creation fails
+        }
 
         return NextResponse.json(branchBalance)
 

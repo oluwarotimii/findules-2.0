@@ -66,6 +66,18 @@ export async function POST(
         // Calculate balance
         const balance = amount - amountSpent
 
+        // Verify that the user exists before retiring the imprest
+        const verifiedUser = await prisma.user.findUnique({
+            where: { id: user.id }
+        })
+
+        if (!verifiedUser) {
+            return NextResponse.json(
+                { error: 'User not found. Please log in again.' },
+                { status: 401 }
+            )
+        }
+
         // Get branch balance
         const branchBalance = await prisma.branchBalance.findUnique({
             where: { branchId: imprest.branchId }
@@ -90,7 +102,7 @@ export async function POST(
                     balance,
                     receipts: body.receipts,
                     retirementNotes: body.retirementNotes,
-                    retiredBy: user.userId
+                    retiredBy: user.id
                 },
                 include: {
                     issuer: {
@@ -132,7 +144,7 @@ export async function POST(
                     balanceBefore: balanceBefore,
                     balanceAfter: balanceAfter,
                     reference: id,
-                    performedBy: user.userId,
+                    performedBy: user.id,
                     notes: `Imprest retired by ${imprest.staffName}. Amount spent: ${amountSpent}, Balance returned: ${balance}`
                 }
             })
@@ -141,20 +153,25 @@ export async function POST(
         })
 
         // Log action
-        await prisma.auditLog.create({
-            data: {
-                userId: user.userId,
-                action: 'RETIRE_IMPREST',
-                module: 'IMPREST',
-                details: {
-                    imprestNo: result.imprestNo,
-                    staffName: result.staffName,
-                    amountSpent: amountSpent.toString(),
-                    balance: balance.toString()
-                },
-                ipAddress: request.headers.get('x-forwarded-for') || 'unknown'
-            }
-        })
+        try {
+            await prisma.auditLog.create({
+                data: {
+                    userId: user.id,
+                    action: 'RETIRE_IMPREST',
+                    module: 'IMPREST',
+                    details: {
+                        imprestNo: result.imprestNo,
+                        staffName: result.staffName,
+                        amountSpent: amountSpent.toString(),
+                        balance: balance.toString()
+                    },
+                    ipAddress: request.headers.get('x-forwarded-for') || 'unknown'
+                }
+            })
+        } catch (auditError) {
+            console.error('Failed to create audit log:', auditError)
+            // Don't fail the imprest retirement if audit log creation fails
+        }
 
         return NextResponse.json(result)
 

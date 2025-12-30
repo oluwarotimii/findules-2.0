@@ -146,6 +146,18 @@ export async function POST(request: NextRequest) {
             )
         }
 
+        // Verify that the user exists before creating the imprest
+        const verifiedUser = await prisma.user.findUnique({
+            where: { id: user.id }
+        })
+
+        if (!verifiedUser) {
+            return NextResponse.json(
+                { error: 'User not found. Please log in again.' },
+                { status: 401 }
+            )
+        }
+
         // Generate imprest number
         const count = await prisma.imprest.count()
         const imprestNo = generateImprestNumber(count)
@@ -161,7 +173,7 @@ export async function POST(request: NextRequest) {
                     category: body.category as ImprestCategory,
                     purpose: body.purpose,
                     dateIssued: body.dateIssued ? new Date(body.dateIssued) : new Date(),
-                    issuedBy: user.userId,
+                    issuedBy: user.id,
                     branchId: user.branchId,
                     status: 'ISSUED'
                 },
@@ -200,7 +212,7 @@ export async function POST(request: NextRequest) {
                     balanceBefore: balanceBefore,
                     balanceAfter: balanceAfter,
                     reference: imprestNo,
-                    performedBy: user.userId,
+                    performedBy: user.id,
                     notes: `Imprest issued to ${body.staffName}`
                 }
             })
@@ -209,20 +221,25 @@ export async function POST(request: NextRequest) {
         })
 
         // Log action
-        await prisma.auditLog.create({
-            data: {
-                userId: user.userId,
-                action: 'CREATE_IMPREST',
-                module: 'IMPREST',
-                details: {
-                    imprestNo: result.imprest.imprestNo,
-                    staffName: result.imprest.staffName,
-                    amount: result.imprest.amount.toString(),
-                    branchBalance: result.updatedBranchBalance.currentBalance.toString()
-                },
-                ipAddress: request.headers.get('x-forwarded-for') || 'unknown'
-            }
-        })
+        try {
+            await prisma.auditLog.create({
+                data: {
+                    userId: user.id,
+                    action: 'CREATE_IMPREST',
+                    module: 'IMPREST',
+                    details: {
+                        imprestNo: result.imprest.imprestNo,
+                        staffName: result.imprest.staffName,
+                        amount: result.imprest.amount.toString(),
+                        branchBalance: result.updatedBranchBalance.currentBalance.toString()
+                    },
+                    ipAddress: request.headers.get('x-forwarded-for') || 'unknown'
+                }
+            })
+        } catch (auditError) {
+            console.error('Failed to create audit log:', auditError)
+            // Don't fail the imprest creation if audit log creation fails
+        }
 
         return NextResponse.json(result.imprest)
 

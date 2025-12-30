@@ -285,15 +285,20 @@ export async function DELETE(
         })
 
         // Log action
-        await prisma.auditLog.create({
-            data: {
-                userId: user.userId,
-                action: 'DELETE_FUEL_COUPON',
-                module: 'FUEL_COUPON',
-                details: { documentCode: documentCode, staffName: fuelCoupon.staffName },
-                ipAddress: request.headers.get('x-forwarded-for') || 'unknown'
-            }
-        })
+        try {
+            await prisma.auditLog.create({
+                data: {
+                    userId: user.id,
+                    action: 'DELETE_FUEL_COUPON',
+                    module: 'FUEL_COUPON',
+                    details: { documentCode: documentCode, staffName: fuelCoupon.staffName },
+                    ipAddress: request.headers.get('x-forwarded-for') || 'unknown'
+                }
+            })
+        } catch (auditError) {
+            console.error('Failed to create audit log:', auditError)
+            // Don't fail the fuel coupon deletion if audit log creation fails
+        }
 
         return NextResponse.json({ message: 'Fuel coupon deleted successfully' })
 

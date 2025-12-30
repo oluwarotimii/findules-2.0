@@ -69,6 +69,18 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: 'Name and Branch ID are required' }, { status: 400 })
         }
 
+        // Verify that the user exists before creating the cashier
+        const verifiedUser = await prisma.user.findUnique({
+            where: { id: user.id }
+        })
+
+        if (!verifiedUser) {
+            return NextResponse.json(
+                { error: 'User not found. Please log in again.' },
+                { status: 401 }
+            )
+        }
+
         // Verify that the branch exists
         const branch = await prisma.branch.findUnique({
             where: { branchId }
@@ -113,15 +125,20 @@ export async function POST(request: NextRequest) {
         }
 
         // Log action
-        await prisma.auditLog.create({
-            data: {
-                userId: user.userId,
-                action: 'CREATE_CASHIER',
-                module: 'USER_MANAGEMENT',
-                details: { cashierId: cashier.id, name: cashier.name },
-                ipAddress: request.headers.get('x-forwarded-for') || 'unknown'
-            }
-        })
+        try {
+            await prisma.auditLog.create({
+                data: {
+                    userId: user.id,
+                    action: 'CREATE_CASHIER',
+                    module: 'USER_MANAGEMENT',
+                    details: { cashierId: cashier.id, name: cashier.name },
+                    ipAddress: request.headers.get('x-forwarded-for') || 'unknown'
+                }
+            })
+        } catch (auditError) {
+            console.error('Failed to create audit log:', auditError)
+            // Don't fail the cashier creation if audit log creation fails
+        }
 
         return NextResponse.json(cashier)
 

@@ -73,7 +73,7 @@ export async function GET(request: NextRequest) {
                 overdue: imprest.filter((i: any) => i.status === 'OVERDUE').length,
             },
             recentActivity: await prisma.auditLog.findMany({
-                where: isManager ? {} : { userId: payload.id },
+                where: isManager ? {} : { id: payload.id },
                 take: 5,
                 orderBy: { timestamp: 'desc' },
                 include: { user: { select: { name: true } } }

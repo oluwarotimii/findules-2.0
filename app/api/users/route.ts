@@ -163,21 +163,26 @@ export async function POST(request: NextRequest) {
             })
 
             // Log action
-            await tx.auditLog.create({
-                data: {
-                    userId: user.id, // This should be the ID from the JWT token
-                    action: 'CREATE_USER',
-                    module: 'USER_MANAGEMENT',
-                    details: {
-                        newUserId: createdUser.id,
-                        name: createdUser.name,
-                        email: createdUser.email,
-                        role: createdUser.role,
-                        branchId: createdUser.branchId
-                    },
-                    ipAddress: request.headers.get('x-forwarded-for') || 'unknown'
-                }
-            })
+            try {
+                await tx.auditLog.create({
+                    data: {
+                        userId: user.id, // This should be the ID from the JWT token
+                        action: 'CREATE_USER',
+                        module: 'USER_MANAGEMENT',
+                        details: {
+                            newUserId: createdUser.id,
+                            name: createdUser.name,
+                            email: createdUser.email,
+                            role: createdUser.role,
+                            branchId: createdUser.branchId
+                        },
+                        ipAddress: request.headers.get('x-forwarded-for') || 'unknown'
+                    }
+                })
+            } catch (auditError) {
+                console.error('Failed to create audit log:', auditError)
+                // Don't fail the user creation if audit log creation fails
+            }
 
             return createdUser
         })

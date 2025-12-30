@@ -36,15 +36,20 @@ export async function DELETE(
         })
 
         // Log action
-        await prisma.auditLog.create({
-            data: {
-                userId: user.userId,
-                action: 'DEACTIVATE_CASHIER',
-                module: 'USER_MANAGEMENT',
-                details: { cashierId: id, name: cashier.name },
-                ipAddress: request.headers.get('x-forwarded-for') || 'unknown'
-            }
-        })
+        try {
+            await prisma.auditLog.create({
+                data: {
+                    userId: user.id,
+                    action: 'DEACTIVATE_CASHIER',
+                    module: 'USER_MANAGEMENT',
+                    details: { cashierId: id, name: cashier.name },
+                    ipAddress: request.headers.get('x-forwarded-for') || 'unknown'
+                }
+            })
+        } catch (auditError) {
+            console.error('Failed to create audit log:', auditError)
+            // Don't fail the cashier deactivation if audit log creation fails
+        }
 
         return NextResponse.json(updatedCashier)
 

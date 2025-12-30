@@ -110,7 +110,7 @@ export async function DELETE(
         // Log action
         await prisma.auditLog.create({
             data: {
-                userId: user.userId,
+                id: user.id,
                 action: 'DELETE_IMPREST',
                 module: 'IMPREST',
                 details: { imprestNo: id, staffName: imprest.staffName },

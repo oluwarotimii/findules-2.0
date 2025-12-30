@@ -148,6 +148,18 @@ export async function POST(request: NextRequest) {
         // Determine Variance Category
         const varianceCategory = calculateVarianceCategory(overageShortage.toNumber()) as VarianceCategory
 
+        // Verify that the user exists before creating the reconciliation
+        const verifiedUser = await prisma.user.findUnique({
+            where: { id: user.id }
+        })
+
+        if (!verifiedUser) {
+            return NextResponse.json(
+                { error: 'User not found. Please log in again.' },
+                { status: 401 }
+            )
+        }
+
         const reconciliation = await prisma.reconciliation.create({
             data: {
                 serialNumber,
@@ -191,21 +203,26 @@ export async function POST(request: NextRequest) {
 
                 remarks: body.remarks,
 
-                submittedBy: user.userId,
+                submittedBy: user.id,
                 createdByIp: request.headers.get('x-forwarded-for') || 'unknown',
             }
         })
 
         // Log action
-        await prisma.auditLog.create({
-            data: {
-                userId: user.userId,
-                action: 'CREATE_RECONCILIATION',
-                module: 'RECONCILIATION',
-                details: { reconciliationId: reconciliation.serialNumber, cashierName: cashier.name },
-                ipAddress: request.headers.get('x-forwarded-for') || 'unknown'
-            }
-        })
+        try {
+            await prisma.auditLog.create({
+                data: {
+                    userId: user.id,
+                    action: 'CREATE_RECONCILIATION',
+                    module: 'RECONCILIATION',
+                    details: { reconciliationId: reconciliation.serialNumber, cashierName: cashier.name },
+                    ipAddress: request.headers.get('x-forwarded-for') || 'unknown'
+                }
+            })
+        } catch (auditError) {
+            console.error('Failed to create audit log:', auditError)
+            // Don't fail the reconciliation creation if audit log creation fails
+        }
 
         return NextResponse.json(reconciliation)
 

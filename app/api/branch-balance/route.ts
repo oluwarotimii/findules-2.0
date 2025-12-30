@@ -75,6 +75,18 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: 'Forbidden - Manager access required' }, { status: 403 })
         }
 
+        // Verify that the user exists in the database
+        const verifiedUser = await prisma.user.findUnique({
+            where: { id: user.id }
+        })
+
+        if (!verifiedUser) {
+            return NextResponse.json(
+                { error: 'User not found. Please log in again.' },
+                { status: 401 }
+            )
+        }
+
         const body = await request.json()
 
         // Validation
@@ -106,98 +118,82 @@ export async function POST(request: NextRequest) {
             )
         }
 
-        // Check if branch balance already exists
+        // Check if branch balance already exists before upsert to determine transaction type
         const existingBalance = await prisma.branchBalance.findUnique({
             where: { branchId: body.branchId }
-        })
+        });
 
-        let branchBalance
+        // Use upsert to handle both creation and update in one atomic operation
+        const upsertResult = await prisma.branchBalance.upsert({
+            where: { 
+                branchId: body.branchId 
+            },
+            update: {
+                currentBalance: { increment: parseDecimal(amount) },
+                openingBalance: { increment: parseDecimal(amount) },
+                lastUpdated: new Date(),
+            },
+            create: {
+                branchId: body.branchId,
+                openingBalance: parseDecimal(amount),
+                currentBalance: parseDecimal(amount),
+                totalIssued: 0,
+                totalRetired: 0,
+                lastUpdated: new Date(),
+            },
+        });
 
-        if (existingBalance) {
-            // Update existing balance (top up)
-            const balanceBefore = existingBalance.currentBalance
-            const balanceAfter = balanceBefore.toNumber() + amount
+        // Determine transaction details based on whether it was an update or creation
+        const balanceBefore = existingBalance ? existingBalance.currentBalance.toNumber() : 0;
+        const balanceAfter = balanceBefore + amount;
+        const transactionType = existingBalance ? 'TOP_UP' : 'OPENING_BALANCE';
+        const notes = body.notes || (existingBalance ? 'Balance top up by manager' : 'Initial opening balance');
 
-            // Update the branch balance
-            const updatedBalance = await prisma.branchBalance.update({
-                where: { branchId: body.branchId },
-                data: {
-                    currentBalance: parseDecimal(balanceAfter),
-                    openingBalance: parseDecimal(existingBalance.openingBalance.toNumber() + amount)
-                },
-                include: {
-                    branch: {
-                        select: {
-                            branchName: true,
-                            branchCode: true
-                        }
+        // Create transaction record
+        await prisma.branchBalanceTransaction.create({
+            data: {
+                branchBalanceId: upsertResult.id,
+                transactionType: transactionType,
+                amount: parseDecimal(amount),
+                balanceBefore: parseDecimal(balanceBefore),
+                balanceAfter: parseDecimal(balanceAfter),
+                performedBy: user.id,
+                notes: notes
+            }
+        });
+
+        // Fetch the final branch balance with branch details
+        const branchBalance = await prisma.branchBalance.findUnique({
+            where: { branchId: body.branchId },
+            include: {
+                branch: {
+                    select: {
+                        branchName: true,
+                        branchCode: true
                     }
                 }
-            })
-
-            // Create transaction record
-            await prisma.branchBalanceTransaction.create({
-                data: {
-                    branchBalanceId: existingBalance.id,
-                    transactionType: 'TOP_UP',
-                    amount: parseDecimal(amount),
-                    balanceBefore: balanceBefore,
-                    balanceAfter: parseDecimal(balanceAfter),
-                    performedBy: user.userId,
-                    notes: body.notes || 'Balance top up by manager'
-                }
-            })
-
-            branchBalance = updatedBalance
-        } else {
-            // Create new branch balance
-            const newBranchBalance = await prisma.branchBalance.create({
-                data: {
-                    branchId: body.branchId,
-                    openingBalance: parseDecimal(amount),
-                    currentBalance: parseDecimal(amount)
-                },
-                include: {
-                    branch: {
-                        select: {
-                            branchName: true,
-                            branchCode: true
-                        }
-                    }
-                }
-            })
-
-            // Create transaction record
-            await prisma.branchBalanceTransaction.create({
-                data: {
-                    branchBalanceId: newBranchBalance.id,
-                    transactionType: 'OPENING_BALANCE',
-                    amount: parseDecimal(amount),
-                    balanceBefore: parseDecimal(0),
-                    balanceAfter: parseDecimal(amount),
-                    performedBy: user.userId,
-                    notes: body.notes || 'Initial opening balance'
-                }
-            })
-
-            // Use the created branch balance directly
-            branchBalance = newBranchBalance
-        }
+            }
+        });
 
         // Log action
-        await prisma.auditLog.create({
-            data: {
-                userId: user.userId,
-                action: existingBalance ? 'TOP_UP_BRANCH_BALANCE' : 'CREATE_BRANCH_BALANCE',
-                module: 'BRANCH_BALANCE',
-                details: {
-                    branchId: body.branchId,
-                    amount: body.amount.toString(),
-                    branchName: branch.branchName
-                },
-                ipAddress: request.headers.get('x-forwarded-for') || 'unknown'
-            }
-        })
+        try {
+            await prisma.auditLog.create({
+                data: {
+                    userId: user.id,
+                    action: existingBalance ? 'TOP_UP_BRANCH_BALANCE' : 'CREATE_BRANCH_BALANCE',
+                    module: 'BRANCH_BALANCE',
+                    details: {
+                        branchId: body.branchId,
+                        amount: body.amount.toString(),
+                        branchName: branch.branchName
+                    },
+                    ipAddress: request.headers.get('x-forwarded-for') || 'unknown'
+                }
+            })
+        } catch (auditError) {
+            console.error('Failed to create audit log:', auditError)
+            // Don't fail the branch balance operation if audit log creation fails
+        }
 
         return NextResponse.json(branchBalance)
 

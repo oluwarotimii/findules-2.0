@@ -62,13 +62,13 @@ CREATE TABLE `cash_requisitions` (
     `requestedBy` VARCHAR(100) NOT NULL,
     `dateNeeded` DATE NOT NULL,
     `dateRecorded` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
-    `recordedBy` VARCHAR(20) NOT NULL,
+    `recordedBy` VARCHAR(30) NOT NULL,
     `status` ENUM('RECORDED', 'PAID', 'CANCELLED') NOT NULL DEFAULT 'RECORDED',
     `paymentDate` DATE NULL,
     `paymentMethod` ENUM('CASH', 'BANK_TRANSFER', 'CHEQUE') NULL,
     `paymentReference` VARCHAR(50) NULL,
     `amountPaid` DECIMAL(15, 2) NULL,
-    `paidBy` VARCHAR(20) NULL,
+    `paidBy` VARCHAR(30) NULL,
     `branchId` VARCHAR(20) NOT NULL,
 
     INDEX `cash_requisitions_branchId_status_idx`(`branchId`, `status`),
@@ -119,12 +119,12 @@ CREATE TABLE `reconciliations` (
     `supervisorSignature` VARCHAR(255) NULL,
     `supervisorComments` TEXT NULL,
     `submittedAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
-    `submittedBy` VARCHAR(20) NOT NULL,
+    `submittedBy` VARCHAR(30) NOT NULL,
     `approvalStatus` ENUM('PENDING_REVIEW', 'SUBMITTED') NOT NULL DEFAULT 'SUBMITTED',
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL,
     `createdByIp` VARCHAR(45) NULL,
-    `lastModifiedBy` VARCHAR(20) NULL,
+    `lastModifiedBy` VARCHAR(30) NULL,
 
     INDEX `reconciliations_branchId_date_idx`(`branchId`, `date`),
     INDEX `reconciliations_cashierId_date_idx`(`cashierId`, `date`),
@@ -146,7 +146,7 @@ CREATE TABLE `fuel_coupons` (
     `fuelType` ENUM('PETROL', 'DIESEL') NOT NULL,
     `quantityLitres` DECIMAL(10, 2) NOT NULL,
     `estimatedAmount` DECIMAL(15, 2) NOT NULL,
-    `createdBy` VARCHAR(20) NOT NULL,
+    `createdBy` VARCHAR(30) NOT NULL,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `branchId` VARCHAR(20) NOT NULL,
     `pdfGenerated` BOOLEAN NOT NULL DEFAULT false,
@@ -170,14 +170,14 @@ CREATE TABLE `imprest` (
     `category` ENUM('TRANSPORT', 'MEALS', 'SUPPLIES', 'OTHER') NOT NULL,
     `purpose` TEXT NOT NULL,
     `dateIssued` DATE NOT NULL,
-    `issuedBy` VARCHAR(20) NOT NULL,
+    `issuedBy` VARCHAR(30) NOT NULL,
     `status` ENUM('ISSUED', 'RETIRED', 'OVERDUE') NOT NULL DEFAULT 'ISSUED',
     `dateRetired` DATE NULL,
     `amountSpent` DECIMAL(15, 2) NULL,
     `balance` DECIMAL(15, 2) NULL,
     `receipts` LONGTEXT NULL,
     `retirementNotes` TEXT NULL,
-    `retiredBy` VARCHAR(20) NULL,
+    `retiredBy` VARCHAR(30) NULL,
     `branchId` VARCHAR(20) NOT NULL,
     `createdAt` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
     `updatedAt` DATETIME(3) NOT NULL,
@@ -197,13 +197,13 @@ CREATE TABLE `imprest` (
 CREATE TABLE `audit_logs` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `timestamp` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
-    `userId` VARCHAR(30) NOT NULL,
+    `id` VARCHAR(30) NOT NULL,
     `action` VARCHAR(50) NOT NULL,
     `module` VARCHAR(50) NULL,
     `details` JSON NULL,
     `ipAddress` VARCHAR(45) NULL,
 
-    INDEX `audit_logs_userId_idx`(`userId`),
+    INDEX `audit_logs_id_idx`(`id`),
     INDEX `audit_logs_timestamp_idx`(`timestamp`),
     INDEX `audit_logs_module_idx`(`module`),
     PRIMARY KEY (`id`)
@@ -227,7 +227,7 @@ ALTER TABLE `imprest` ADD CONSTRAINT `imprest_branchId_fkey` FOREIGN KEY (`branc
 ALTER TABLE `imprest` ADD CONSTRAINT `imprest_issuedBy_fkey` FOREIGN KEY (`issuedBy`) REFERENCES `users`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 ALTER TABLE `imprest` ADD CONSTRAINT `imprest_retiredBy_fkey` FOREIGN KEY (`retiredBy`) REFERENCES `users`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
-ALTER TABLE `audit_logs` ADD CONSTRAINT `audit_logs_userId_fkey` FOREIGN KEY (`userId`) REFERENCES `users`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE `audit_logs` ADD CONSTRAINT `audit_logs_id_fkey` FOREIGN KEY (`id`) REFERENCES `users`(`id`) ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- Show success message
 SELECT 'Database "findules" with all tables created successfully!' AS message;

@@ -42,19 +42,24 @@ export async function PATCH(
         })
 
         // Log the action
-        await prisma.auditLog.create({
-            data: {
-                userId: payload.userId,
-                action: 'retire_reconciliation',
-                module: 'reconciliations',
-                details: {
-                    serialNumber,
-                    previousStatus: reconciliation.status,
-                    newStatus: 'RETIRED'
-                },
-                ipAddress: request.headers.get('x-forwarded-for') || 'unknown'
-            }
-        })
+        try {
+            await prisma.auditLog.create({
+                data: {
+                    userId: payload.id,
+                    action: 'retire_reconciliation',
+                    module: 'reconciliations',
+                    details: {
+                        serialNumber,
+                        previousStatus: reconciliation.status,
+                        newStatus: 'RETIRED'
+                    },
+                    ipAddress: request.headers.get('x-forwarded-for') || 'unknown'
+                }
+            })
+        } catch (auditError) {
+            console.error('Failed to create audit log:', auditError)
+            // Don't fail the reconciliation retirement if audit log creation fails
+        }
 
         return NextResponse.json({
             success: true,

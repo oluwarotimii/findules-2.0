@@ -336,13 +336,13 @@ export default function BranchManagementPage() {
                             {branch.branchBalance ? (
                                 <div className="space-y-3 mb-4">
                                     <div className="flex justify-between items-center">
-                                        <span className="text-sm text-[color:var(--muted-foreground)]">Current Balance</span>
+                                        <span className="text-sm text-[color:var(--muted-foreground)]">Current Imprest Balance</span>
                                         <span className="font-bold text-lg text-[color:var(--primary)]">
                                             {formatCurrency(branch.branchBalance.currentBalance)}
                                         </span>
                                     </div>
                                     <div className="flex justify-between items-center">
-                                        <span className="text-sm text-[color:var(--muted-foreground)]">Opening Balance</span>
+                                        <span className="text-sm text-[color:var(--muted-foreground)]">Opening I Balance</span>
                                         <span className="font-semibold text-[color:var(--card-foreground)]">
                                             {formatCurrency(branch.branchBalance.openingBalance)}
                                         </span>

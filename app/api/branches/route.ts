@@ -71,15 +71,20 @@ export async function POST(request: NextRequest) {
         })
 
         // Log action
-        await prisma.auditLog.create({
-            data: {
-                userId: user.userId,
-                action: 'CREATE_BRANCH',
-                module: 'BRANCH_MANAGEMENT',
-                details: { branchId: branch.branchId, branchName: branch.branchName },
-                ipAddress: request.headers.get('x-forwarded-for') || 'unknown'
-            }
-        })
+        try {
+            await prisma.auditLog.create({
+                data: {
+                    userId: user.id,
+                    action: 'CREATE_BRANCH',
+                    module: 'BRANCH_MANAGEMENT',
+                    details: { branchId: branch.branchId, branchName: branch.branchName },
+                    ipAddress: request.headers.get('x-forwarded-for') || 'unknown'
+                }
+            })
+        } catch (auditError) {
+            console.error('Failed to create audit log:', auditError)
+            // Don't fail the branch creation if audit log creation fails
+        }
 
         return NextResponse.json(branch)
 
