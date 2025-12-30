@@ -8,7 +8,7 @@ const parseDecimal = (val: any) => new Prisma.Decimal(val || 0)
 // GET: Get specific branch balance details
 export async function GET(
     request: NextRequest,
-    { params }: { params: { branchId: string } }
+    { params }: { params: Promise<{ branchId: string }> }
 ) {
     try {
         const token = request.headers.get('Authorization')?.split(' ')[1]
