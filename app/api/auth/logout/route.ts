@@ -25,22 +25,37 @@ export async function POST(request: NextRequest) {
         }
 
         // Log the logout
-        await prisma.auditLog.create({
-            data: {
-                userId: payload.userId,
-                action: 'logout',
-                module: 'auth',
-                details: {
-                    timestamp: new Date().toISOString(),
+        try {
+            await prisma.auditLog.create({
+                data: {
+                    userId: payload.id,
+                    action: 'logout',
+                    module: 'auth',
+                    details: {
+                        timestamp: new Date().toISOString(),
+                    },
+                    ipAddress: request.headers.get('x-forwarded-for') || 'unknown',
                 },
-                ipAddress: request.headers.get('x-forwarded-for') || 'unknown',
-            },
-        })
+            })
+        } catch (auditError) {
+            console.error('Failed to create audit log:', auditError)
+            // Don't fail the logout if audit log creation fails
+        }
 
-        return NextResponse.json({
+        const response = NextResponse.json({
             success: true,
             message: 'Logged out successfully',
         })
+
+        response.cookies.set('token', '', {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'lax',
+            maxAge: -1,
+            path: '/',
+        })
+
+        return response
     } catch (error) {
         console.error('Logout error:', error)
         return NextResponse.json(

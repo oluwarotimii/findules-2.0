@@ -134,56 +134,55 @@ export async function POST(request: NextRequest) {
         // Hash password
         const passwordHash = await bcrypt.hash(body.password, 10)
 
-        // Create user
-        const newUser = await prisma.user.create({
-            data: {
-                name: body.name,
-                email: body.email,
-                passwordHash,
-                role: body.role,
-                branchId: body.branchId,
-                status: 'ACTIVE'
-            }
-        })
-
-        // Fetch the created user with branch information
-        const userWithBranch = await prisma.user.findUnique({
-            where: { id: newUser.id },
-            select: {
-                id: true,
-                name: true,
-                email: true,
-                role: true,
-                branchId: true,
-                status: true,
-                createdAt: true,
-                branch: {
-                    select: {
-                        branchName: true,
-                        branchCode: true
+        // Create user in a transaction with audit log
+        const newUser = await prisma.$transaction(async (tx) => {
+            const createdUser = await tx.user.create({
+                data: {
+                    name: body.name,
+                    email: body.email,
+                    passwordHash,
+                    role: body.role,
+                    branchId: body.branchId,
+                    status: 'ACTIVE'
+                },
+                select: {
+                    id: true,
+                    name: true,
+                    email: true,
+                    role: true,
+                    branchId: true,
+                    status: true,
+                    createdAt: true,
+                    branch: {
+                        select: {
+                            branchName: true,
+                            branchCode: true
+                        }
                     }
                 }
-            }
+            })
+
+            // Log action
+            await tx.auditLog.create({
+                data: {
+                    userId: user.id, // This should be the ID from the JWT token
+                    action: 'CREATE_USER',
+                    module: 'USER_MANAGEMENT',
+                    details: {
+                        newUserId: createdUser.id,
+                        name: createdUser.name,
+                        email: createdUser.email,
+                        role: createdUser.role,
+                        branchId: createdUser.branchId
+                    },
+                    ipAddress: request.headers.get('x-forwarded-for') || 'unknown'
+                }
+            })
+
+            return createdUser
         })
 
-        // Log action
-        await prisma.auditLog.create({
-            data: {
-                userId: user.userId,
-                action: 'CREATE_USER',
-                module: 'USER_MANAGEMENT',
-                details: {
-                    newUserId: newUser.id,
-                    name: newUser.name,
-                    email: newUser.email,
-                    role: newUser.role,
-                    branchId: newUser.branchId
-                },
-                ipAddress: request.headers.get('x-forwarded-for') || 'unknown'
-            }
-        })
-
-        return NextResponse.json(userWithBranch)
+        return NextResponse.json(newUser)
 
     } catch (error) {
         console.error('Error creating user:', error)

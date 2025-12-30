@@ -4,7 +4,7 @@ import jwt from 'jsonwebtoken'
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key'
 
 export interface JWTPayload {
-    userId: string
+    id: string
     email: string
     role: string
     branchId: string
@@ -43,7 +43,7 @@ export function verifyToken(token: string): JWTPayload | null {
     try {
         console.log('Verifying token with secret:', JWT_SECRET ? 'exists' : 'missing')
         const decoded = jwt.verify(token, JWT_SECRET) as JWTPayload
-        console.log('Token verified successfully for user:', decoded.userId)
+        console.log('Token verified successfully for user:', decoded.id)
         return decoded
     } catch (error: any) {
         console.error('Token verification failed:', error.message)

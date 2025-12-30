@@ -153,18 +153,23 @@ export async function PUT(
         })
 
         // Log action
-        await prisma.auditLog.create({
-            data: {
-                userId: user.userId,
-                action: 'UPDATE_USER',
-                module: 'USER_MANAGEMENT',
-                details: {
-                    targetUserId: id,
-                    changes: updateData
-                },
-                ipAddress: request.headers.get('x-forwarded-for') || 'unknown'
-            }
-        })
+        try {
+            await prisma.auditLog.create({
+                data: {
+                    userId: user.id,
+                    action: 'UPDATE_USER',
+                    module: 'USER_MANAGEMENT',
+                    details: {
+                        targetUserId: id,
+                        changes: updateData
+                    },
+                    ipAddress: request.headers.get('x-forwarded-for') || 'unknown'
+                }
+            })
+        } catch (auditError) {
+            console.error('Failed to create audit log:', auditError)
+            // Don't fail the user update if audit log creation fails
+        }
 
         return NextResponse.json(updatedUser)
 
@@ -201,7 +206,7 @@ export async function DELETE(
         const { id } = params
 
         // Cannot delete self
-        if (id === user.userId) {
+        if (id === user.id) {
             return NextResponse.json(
                 { error: 'Cannot delete your own account' },
                 { status: 400 }
@@ -223,19 +228,24 @@ export async function DELETE(
         })
 
         // Log action
-        await prisma.auditLog.create({
-            data: {
-                userId: user.userId,
-                action: 'DELETE_USER',
-                module: 'USER_MANAGEMENT',
-                details: {
-                    deletedUserId: id,
-                    name: existingUser.name,
-                    email: existingUser.email
-                },
-                ipAddress: request.headers.get('x-forwarded-for') || 'unknown'
-            }
-        })
+        try {
+            await prisma.auditLog.create({
+                data: {
+                    userId: user.id,
+                    action: 'DELETE_USER',
+                    module: 'USER_MANAGEMENT',
+                    details: {
+                        deletedUserId: id,
+                        name: existingUser.name,
+                        email: existingUser.email
+                    },
+                    ipAddress: request.headers.get('x-forwarded-for') || 'unknown'
+                }
+            })
+        } catch (auditError) {
+            console.error('Failed to create audit log:', auditError)
+            // Don't fail the user deletion if audit log creation fails
+        }
 
         return NextResponse.json({ message: 'User deleted successfully' })
 

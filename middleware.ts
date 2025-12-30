@@ -31,7 +31,7 @@ export async function middleware(request: NextRequest) {
     console.log('Middleware - Token valid, allowing access')
 
     const requestHeaders = new Headers(request.headers)
-    requestHeaders.set('x-user-id', payload.userId)
+    requestHeaders.set('x-user-id', payload.id)
     requestHeaders.set('x-user-role', payload.role)
     requestHeaders.set('x-user-branch', payload.branchId)
 

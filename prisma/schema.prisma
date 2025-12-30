@@ -8,12 +8,12 @@ datasource db {
 }
 
 model User {
-  id                       String                     @id @default(cuid()) @db.VarChar(20)
+  id                       String                     @id @default(cuid()) @db.VarChar(30)
   name                     String                     @db.VarChar(100)
   email                    String                     @unique @db.VarChar(100)
   passwordHash             String                     @db.Text
   role                     Role                       @default(STAFF)
-  branchId                 String                     @db.VarChar(20)
+  branchId                 String                     @db.VarChar(30)
   status                   Status                     @default(ACTIVE)
   createdAt                DateTime                   @default(now())
   updatedAt                DateTime                   @updatedAt
@@ -213,7 +213,7 @@ model Imprest {
 model AuditLog {
   id        Int      @id @default(autoincrement())
   timestamp DateTime @default(now())
-  userId    String   @db.VarChar(20)
+  userId    String   @db.VarChar(30)
   action    String   @db.VarChar(50)
   module    String?  @db.VarChar(50)
   details   Json?    @db.Json

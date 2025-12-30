@@ -5,7 +5,7 @@ const JWT_SECRET = new TextEncoder().encode(
 )
 
 export interface JWTPayload {
-    userId: string
+    id: string
     email: string
     role: string
     branchId: string
@@ -17,7 +17,7 @@ export async function verifyTokenEdge(token: string): Promise<JWTPayload | null>
 
         // Extract our custom fields
         return {
-            userId: payload.userId as string,
+            id: payload.id as string,
             email: payload.email as string,
             role: payload.role as string,
             branchId: payload.branchId as string,

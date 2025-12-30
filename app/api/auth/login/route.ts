@@ -54,24 +54,30 @@ export async function POST(request: NextRequest) {
         }
 
         const token = generateToken({
-            userId: user.id,
+            id: user.id,
             email: user.email,
             role: user.role,
             branchId: user.branchId,
         })
 
-        await prisma.auditLog.create({
-            data: {
-                userId: user.id,
-                action: 'login',
-                module: 'auth',
-                details: {
-                    email: user.email,
-                    timestamp: new Date().toISOString(),
+        // Create audit log for successful login
+        try {
+            await prisma.auditLog.create({
+                data: {
+                    userId: user.id,
+                    action: 'login',
+                    module: 'auth',
+                    details: {
+                        email: user.email,
+                        timestamp: new Date().toISOString(),
+                    },
+                    ipAddress: request.headers.get('x-forwarded-for') || 'unknown',
                 },
-                ipAddress: request.headers.get('x-forwarded-for') || 'unknown',
-            },
-        })
+            })
+        } catch (auditError) {
+            console.error('Failed to create audit log:', auditError)
+            // Don't fail the login if audit log creation fails
+        }
 
         const response = NextResponse.json({
             success: true,

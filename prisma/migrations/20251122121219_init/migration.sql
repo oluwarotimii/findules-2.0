@@ -190,7 +190,7 @@ CREATE TABLE `imprest` (
 CREATE TABLE `audit_logs` (
     `id` INTEGER NOT NULL AUTO_INCREMENT,
     `timestamp` DATETIME(3) NOT NULL DEFAULT CURRENT_TIMESTAMP(3),
-    `userId` VARCHAR(20) NOT NULL,
+    `userId` VARCHAR(30) NOT NULL,
     `action` VARCHAR(50) NOT NULL,
     `module` VARCHAR(50) NULL,
     `details` JSON NULL,
