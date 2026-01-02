@@ -130,6 +130,10 @@ model Reconciliation {
   @@index([date])
   @@index([varianceCategory])
   @@index([status])
+  @@index([approvalStatus])
+  @@index([date, approvalStatus])
+  @@index([branchId, approvalStatus])
+  @@index([branchId, date, approvalStatus])
   @@map("reconciliations")
 }
 
@@ -173,6 +177,9 @@ model FuelCoupon {
   @@index([department])
   @@index([fuelType])
   @@index([plateNumber])
+  @@index([date, fuelType])
+  @@index([branchId, fuelType])
+  @@index([branchId, date, fuelType])
   @@index([createdBy], map: "fuel_coupons_createdBy_fkey")
   @@map("fuel_coupons")
 }
@@ -205,6 +212,11 @@ model Imprest {
   @@index([status])
   @@index([staffName])
   @@index([category])
+  @@index([dateIssued, category])
+  @@index([dateIssued, status])
+  @@index([branchId, dateIssued])
+  @@index([branchId, category])
+  @@index([branchId, status, dateIssued])
   @@index([issuedBy], map: "imprest_issuedBy_fkey")
   @@index([retiredBy], map: "imprest_retiredBy_fkey")
   @@map("imprest")

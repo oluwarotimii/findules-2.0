@@ -30,6 +30,11 @@ export async function GET(
             return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
         }
 
+        // Extract query parameters for pagination of transactions
+        const url = new URL(request.url);
+        const page = parseInt(url.searchParams.get('page') || '1');
+        const limit = parseInt(url.searchParams.get('limit') || '10');
+
         const branchBalance = await prisma.branchBalance.findUnique({
             where: { branchId },
             include: {
@@ -41,7 +46,8 @@ export async function GET(
                     }
                 },
                 transactions: {
-                    take: 10,
+                    take: limit,
+                    skip: (page - 1) * limit,
                     orderBy: {
                         createdAt: 'desc'
                     },
@@ -63,7 +69,23 @@ export async function GET(
             )
         }
 
-        return NextResponse.json(branchBalance)
+        // Get total transaction count for pagination info
+        const transactionCount = await prisma.branchBalanceTransaction.count({
+            where: { branchBalanceId: branchBalance.id }
+        });
+
+        return NextResponse.json({
+            ...branchBalance,
+            transactions: {
+                data: branchBalance.transactions,
+                pagination: {
+                    page,
+                    limit,
+                    totalCount: transactionCount,
+                    totalPages: Math.ceil(transactionCount / limit)
+                }
+            }
+        })
 
     } catch (error) {
         console.error('Error fetching branch balance:', error)
@@ -77,7 +99,7 @@ export async function GET(
 // PUT: Update branch balance (top up) - MANAGER only
 export async function PUT(
     request: NextRequest,
-    { params }: { params: { branchId: string } }
+    { params }: { params: Promise<{ branchId: string }> }
 ) {
     try {
         const token = request.headers.get('Authorization')?.split(' ')[1]

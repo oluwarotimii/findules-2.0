@@ -45,6 +45,8 @@ export default function ImprestPage() {
     const [loading, setLoading] = useState(true)
     const [activeTab, setActiveTab] = useState('ALL')
     const [searchTerm, setSearchTerm] = useState('')
+    const [selectedBranch, setSelectedBranch] = useState('ALL')
+    const [branches, setBranches] = useState<any[]>([])
     const [branchBalance, setBranchBalance] = useState<BranchBalance | null>(null)
     const [userRole, setUserRole] = useState<string>('')
 
@@ -61,11 +63,27 @@ export default function ImprestPage() {
             }
         }
         fetchImprest()
+        fetchBranches()
     }, [])
 
     useEffect(() => {
         filterImprest()
-    }, [imprest, activeTab, searchTerm])
+    }, [imprest, activeTab, searchTerm, selectedBranch])
+
+    const fetchBranches = async () => {
+        try {
+            const token = localStorage.getItem('token')
+            const res = await fetch('/api/branches', {
+                headers: { 'Authorization': `Bearer ${token}` }
+            })
+            if (res.ok) {
+                const data = await res.json()
+                setBranches(data)
+            }
+        } catch (error) {
+            console.error('Error fetching branches:', error)
+        }
+    }
 
     const fetchBranchBalance = async (branchId: string) => {
         try {
@@ -90,7 +108,20 @@ export default function ImprestPage() {
     const fetchImprest = async () => {
         try {
             const token = localStorage.getItem('token')
-            const res = await fetch('/api/imprest', {
+            let url = '/api/imprest'
+
+            // Get user data to determine role and branch
+            const userData = localStorage.getItem('user')
+            if (userData) {
+                const user = JSON.parse(userData)
+
+                // For BRANCH_ADMIN and STAFF, only fetch imprest records for their branch
+                if (user.role === 'BRANCH_ADMIN' || user.role === 'STAFF') {
+                    url = `/api/imprest?branchId=${user.branchId}`
+                }
+            }
+
+            const res = await fetch(url, {
                 headers: { 'Authorization': `Bearer ${token}` }
             })
             if (res.ok) {
@@ -112,11 +143,17 @@ export default function ImprestPage() {
             filtered = filtered.filter(i => i.status === activeTab)
         }
 
+        // Filter by branch
+        if (selectedBranch !== 'ALL') {
+            filtered = filtered.filter(i => i.branch?.branchName === selectedBranch)
+        }
+
         // Filter by search term
         if (searchTerm) {
             filtered = filtered.filter(i =>
                 i.staffName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                i.imprestNo.toLowerCase().includes(searchTerm.toLowerCase())
+                i.imprestNo.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                (i.branch?.branchName && i.branch.branchName.toLowerCase().includes(searchTerm.toLowerCase()))
             )
         }
 
@@ -126,7 +163,18 @@ export default function ImprestPage() {
     const handleExport = async (format: 'csv' | 'excel') => {
         try {
             const token = localStorage.getItem('token')
-            const res = await fetch(`/api/export/imprest?format=${format}`, {
+            const userData = localStorage.getItem('user')
+            let url = `/api/export/imprest?format=${format}`
+
+            // Add branch filter for non-manager users
+            if (userData) {
+                const user = JSON.parse(userData)
+                if (user.role !== 'MANAGER') {
+                    url += `&branchId=${user.branchId}`
+                }
+            }
+
+            const res = await fetch(url, {
                 headers: { 'Authorization': `Bearer ${token}` }
             })
             if (res.ok) {
@@ -335,7 +383,7 @@ export default function ImprestPage() {
                             onClick={() => setActiveTab(tab)}
                             className={`px-4 py-2 rounded-lg font-medium transition-colors ${activeTab === tab
                                 ? 'bg-[color:var(--accent)] text-[color:var(--accent-foreground)]'
-                                : 'bg-[color:var(--muted)/.2] text-[color:var(--card-foreground)] hover:bg-[color:var(--muted)/.3]'
+                                : 'bg-[color:var(--muted)/.2] text-[color:var(--card-foreground)] hover:bg-[color:var(--muted)]'
                                 }`}
                         >
                             {tab}
@@ -343,16 +391,38 @@ export default function ImprestPage() {
                     ))}
                 </div>
 
-                {/* Search */}
-                <div className="relative">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[color:var(--muted-foreground)] w-5 h-5" />
-                    <input
-                        type="text"
-                        placeholder="Search by staff name or imprest number..."
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        className="w-full pl-10 pr-4 py-2 border border-[color:var(--border)] rounded-lg focus:ring-2 focus:ring-[color:var(--accent)] bg-[color:var(--card)] text-[color:var(--card-foreground)]"
-                    />
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {/* Branch Filter */}
+                    <div>
+                        <label className="block text-sm font-medium text-[color:var(--muted-foreground)] mb-1">Filter by Branch</label>
+                        <select
+                            value={selectedBranch}
+                            onChange={(e) => setSelectedBranch(e.target.value)}
+                            className="w-full p-2 border border-[color:var(--border)] rounded-lg focus:ring-2 focus:ring-[color:var(--accent)] bg-[color:var(--card)] text-[color:var(--card-foreground)]"
+                        >
+                            <option value="ALL">All Branches</option>
+                            {branches.map((branch) => (
+                                <option key={branch.branchId} value={branch.branchName}>
+                                    {branch.branchName}
+                                </option>
+                            ))}
+                        </select>
+                    </div>
+
+                    {/* Search */}
+                    <div>
+                        <label className="block text-sm font-medium text-[color:var(--muted-foreground)] mb-1">Search</label>
+                        <div className="relative">
+                            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-[color:var(--muted-foreground)] w-5 h-5" />
+                            <input
+                                type="text"
+                                placeholder="Search by staff name, imprest number, or branch..."
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                                className="w-full pl-10 pr-4 py-2 border border-[color:var(--border)] rounded-lg focus:ring-2 focus:ring-[color:var(--accent)] bg-[color:var(--card)] text-[color:var(--card-foreground)]"
+                            />
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -373,6 +443,9 @@ export default function ImprestPage() {
                                     </th>
                                     <th className="px-6 py-3 text-left text-xs font-medium text-[color:var(--muted-foreground)] uppercase tracking-wider">
                                         Staff Name
+                                    </th>
+                                    <th className="px-6 py-3 text-left text-xs font-medium text-[color:var(--muted-foreground)] uppercase tracking-wider">
+                                        Branch
                                     </th>
                                     <th className="px-6 py-3 text-left text-xs font-medium text-[color:var(--muted-foreground)] uppercase tracking-wider">
                                         Amount
@@ -402,6 +475,9 @@ export default function ImprestPage() {
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap">
                                             <span className="text-[color:var(--card-foreground)]">{item.staffName}</span>
+                                        </td>
+                                        <td className="px-6 py-4 whitespace-nowrap">
+                                            <span className="text-[color:var(--card-foreground)]">{item.branch?.branchName || 'N/A'}</span>
                                         </td>
                                         <td className="px-6 py-4 whitespace-nowrap">
                                             <span className="font-semibold text-[color:var(--card-foreground)]">
@@ -437,7 +513,7 @@ export default function ImprestPage() {
                                                 {item.status === 'ISSUED' || item.status === 'OVERDUE' ? (
                                                     <button
                                                         onClick={() => router.push(`/dashboard/imprest/${item.imprestNo}/retire`)}
-                                                        className="px-3 py-1 bg-[color:var(--success)] text-[color:var(--success-foreground)] rounded-lg hover:bg-[color:var(--success)/.9] transition-colors"
+                                                        className="px-3 py-1 bg-[color:var(--success)] text-[color:var(--success-foreground)] rounded-lg"
                                                     >
                                                         Retire
                                                     </button>

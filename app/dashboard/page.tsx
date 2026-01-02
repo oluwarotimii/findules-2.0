@@ -105,7 +105,7 @@ export default function DashboardPage() {
 
             {/* Quick Stats Cards */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                {/* Cash Requisitions */}
+                {/* Cash Requisitions
                 <div className="bg-[color:var(--card)] rounded-xl shadow-sm p-6 border border-[color:var(--border)] hover:shadow-md transition-shadow">
                     <div className="flex items-center justify-between mb-4">
                         <div className="p-3 bg-[color:var(--success)/.2] rounded-lg text-[color:var(--success)]">
@@ -124,7 +124,7 @@ export default function DashboardPage() {
                         <span className="text-[color:var(--muted-foreground)]">Paid: {stats?.requisitions.paid || 0}</span>
                         <span className="text-[color:var(--warning)]">Pending: {stats?.requisitions.pending || 0}</span>
                     </div>
-                </div>
+                </div> */}
 
                 {/* Reconciliations */}
                 <div className="bg-[color:var(--card)] rounded-xl shadow-sm p-6 border border-[color:var(--border)] hover:shadow-md transition-shadow">
@@ -192,7 +192,7 @@ export default function DashboardPage() {
             <div className="bg-[color:var(--card)] rounded-xl shadow-sm p-6 border border-[color:var(--border)]">
                 <h2 className="text-xl font-bold text-[color:var(--card-foreground)] mb-4">Quick Actions</h2>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    <Link
+                    {/* <Link
                         href="/dashboard/requisitions"
                         className="flex flex-col items-center p-4 bg-[color:var(--success)/.1] hover:bg-[color:var(--success)/.2] rounded-lg transition-colors group"
                     >
@@ -200,7 +200,7 @@ export default function DashboardPage() {
                             <Banknote className="w-8 h-8" />
                         </div>
                         <span className="text-sm font-medium text-[color:var(--card-foreground)]">New Requisition</span>
-                    </Link>
+                    </Link> */}
 
                     <Link
                         href="/dashboard/reconciliations/create"

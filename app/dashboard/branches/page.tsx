@@ -72,7 +72,9 @@ export default function BranchManagementPage() {
 
             let balancesData = []
             if (balancesRes.ok) {
-                balancesData = await balancesRes.json()
+                const balancesJson = await balancesRes.json()
+                // Handle both paginated and non-paginated responses
+                balancesData = Array.isArray(balancesJson) ? balancesJson : (balancesJson.data || [])
             }
 
             // Merge branch and balance data

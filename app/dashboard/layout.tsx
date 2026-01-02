@@ -16,7 +16,8 @@ import {
     LogOut,
     Menu,
     X,
-    Building
+    Building,
+    PieChart
 } from 'lucide-react'
 import { ThemeToggle } from '@/components/ui/theme-toggle'
 
@@ -85,24 +86,37 @@ export default function DashboardLayout({
 
     const isManager = user?.role === 'MANAGER'
     const isBranchAdmin = user?.role === 'BRANCH_ADMIN'
+    const isStaff = user?.role === 'STAFF'
 
     const navigation = [
-        { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard, roles: ['STAFF', 'MANAGER'] },
+        { name: 'Dashboard', href: '/dashboard', icon: LayoutDashboard, roles: ['MANAGER'] },
         // { name: 'Cash Requisitions', href: '/dashboard/requisitions', icon: Banknote, roles: ['STAFF', 'MANAGER'] },
-        { name: 'Reconciliations', href: '/dashboard/reconciliations', icon: ClipboardCheck, roles: ['STAFF', 'MANAGER'] },
-        { name: 'Fuel Coupons', href: '/dashboard/fuel-coupons', icon: Fuel, roles: ['STAFF', 'MANAGER'] },
+        { name: 'Reconciliations', href: '/dashboard/reconciliations', icon: ClipboardCheck, roles: ['MANAGER'] },
+        { name: 'Fuel Coupons', href: '/dashboard/fuel-coupons', icon: Fuel, roles: ['MANAGER'] },
         { name: 'Imprest', href: '/dashboard/imprest', icon: Wallet, roles: ['STAFF', 'MANAGER', 'BRANCH_ADMIN'] },
         { name: 'Cashiers', href: '/dashboard/cashiers', icon: Users, roles: ['MANAGER'] },
         { name: 'Branches', href: '/dashboard/branches', icon: Building, roles: ['MANAGER'] },
-        { name: 'Reports', href: '/dashboard/reports', icon: BarChart3, roles: ['MANAGER'] },
+        { name: 'Analytics', href: '/dashboard/analytics', icon: PieChart, roles: ['MANAGER', 'BRANCH_ADMIN', 'STAFF'] },
         { name: 'Audit Logs', href: '/dashboard/audit-logs', icon: BarChart3, roles: ['MANAGER'] },
         { name: 'Users', href: '/dashboard/users', icon: UserCog, roles: ['MANAGER'] },
-        { name: 'Settings', href: '/dashboard/settings', icon: Settings, roles: ['MANAGER'] },
+        // { name: 'Settings', href: '/dashboard/settings', icon: Settings, roles: ['MANAGER'] },
     ]
 
     const filteredNavigation = navigation.filter(item =>
         item.roles.includes(user?.role || '')
-    )
+    );
+
+    // Add profile page for all users
+    const allUsersNavigation = [
+        { name: 'Profile', href: '/dashboard/profile', icon: UserCog, roles: ['STAFF', 'BRANCH_ADMIN', 'MANAGER'] }
+    ];
+
+    const profileNavigation = allUsersNavigation.filter(item =>
+        item.roles.includes(user?.role || '')
+    );
+
+    // Combine navigation items
+    const combinedNavigation = [...filteredNavigation, ...profileNavigation];
 
     return (
         <div className="min-h-screen bg-[color:var(--background)]">
@@ -129,7 +143,7 @@ export default function DashboardLayout({
                     {/* User Info */}
                     <div className="mb-6 px-3 py-3 bg-[color:var(--primary)/.8] rounded-lg">
                         <p className="text-[color:var(--primary-foreground)] font-semibold truncate">{user?.name}</p>
-                        <p className="text-[color:var(--primary-foreground)] text-sm truncate">{user?.email}</p>
+                        {/* <p className="text-[color:var(--primary-foreground)] text-sm truncate">{user?.email}</p> */}
                         <div className="mt-2 flex items-center gap-2 flex-wrap">
                             <span className="px-2 py-1 bg-[color:var(--primary-foreground)] text-[color:var(--primary-foreground)/.9] text-xs rounded">
                                 {user?.role}
@@ -142,7 +156,7 @@ export default function DashboardLayout({
 
                     {/* Navigation */}
                     <nav className="space-y-2 flex-1">
-                        {filteredNavigation.map((item) => (
+                        {combinedNavigation.map((item) => (
                             <Link
                                 key={item.name}
                                 href={item.href}

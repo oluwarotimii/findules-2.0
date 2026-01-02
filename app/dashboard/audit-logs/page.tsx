@@ -148,7 +148,7 @@ export default function AuditLogsPage() {
                 Active Users
               </p>
               <p className="text-3xl font-bold text-[color:var(--secondary)] mt-1">
-                {[...new Set(logs.map((log) => log.id))].length}
+                {[...new Set(logs.map((log) => log.user.name))].length}
               </p>
             </div>
             <div className="p-3 bg-[color:var(--secondary)/.2] rounded-lg">

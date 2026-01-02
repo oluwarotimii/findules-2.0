@@ -8,7 +8,7 @@ export default function IssueImprestPage() {
     const router = useRouter()
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState('')
-    const [categories] = useState(['TRANSPORT', 'MEALS', 'SUPPLIES', 'OTHER'])
+    const [categories] = useState(['TRANSPORT', 'MEALS', 'SUPPLIES', 'Internet Subscription', 'Water', 'Income', 'Tax', 'Airtime', 'Publicity', 'Water', 'Support','OTHERs', ])
 
     const [formData, setFormData] = useState({
         staffName: '',

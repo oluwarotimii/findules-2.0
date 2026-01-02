@@ -18,20 +18,19 @@ export async function GET(request: NextRequest) {
             return NextResponse.json({ error: 'Invalid token' }, { status: 401 })
         }
 
-        // Build query filters
-        const where: any = {}
+        // Extract query parameters for pagination
+        const url = new URL(request.url);
+        const page = parseInt(url.searchParams.get('page') || '1');
+        const limit = parseInt(url.searchParams.get('limit') || '20');
+        const branchId = url.searchParams.get('branchId') || undefined;
 
-        // Role-based filtering
-        if (user.role === 'BRANCH_ADMIN') {
-            // Branch admin can only see their branch
-            where.branchId = user.branchId
-        } else if (user.role !== 'MANAGER') {
-            // Staff cannot access this endpoint
-            return NextResponse.json({ error: 'Forbidden' }, { status: 403 })
-        }
-
-        const branchBalances = await prisma.branchBalance.findMany({
-            where,
+        // Use the service layer for optimized fetching
+        const result = await prisma.branchBalance.findMany({
+            where: {
+                ...(user.role === 'BRANCH_ADMIN' && { branchId: user.branchId }),
+                ...(user.role === 'STAFF' && { id: 'none' }), // Staff can't access
+                ...(branchId && { branchId })
+            },
             include: {
                 branch: {
                     select: {
@@ -43,10 +42,28 @@ export async function GET(request: NextRequest) {
             },
             orderBy: {
                 createdAt: 'desc'
-            }
-        })
+            },
+            skip: (page - 1) * limit,
+            take: limit
+        });
 
-        return NextResponse.json(branchBalances)
+        const totalCount = await prisma.branchBalance.count({
+            where: {
+                ...(user.role === 'BRANCH_ADMIN' && { branchId: user.branchId }),
+                ...(user.role === 'STAFF' && { id: 'none' }),
+                ...(branchId && { branchId })
+            }
+        });
+
+        return NextResponse.json({
+            data: result,
+            pagination: {
+                page,
+                limit,
+                totalCount,
+                totalPages: Math.ceil(totalCount / limit)
+            }
+        });
 
     } catch (error) {
         console.error('Error fetching branch balances:', error)

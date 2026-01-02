@@ -1,0 +1,60 @@
+<svg width="600" height="600" viewBox="0 0 600 600" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <style>
+      .primary { fill: none; stroke: #2f6fb2; }
+      .text { fill: #2f6fb2; font-family: Arial, Helvetica, sans-serif; }
+    </style>
+  </defs>
+
+  <!-- Outer Rings -->
+  <circle cx="300" cy="300" r="270" class="primary" stroke-width="14"/>
+  <circle cx="300" cy="300" r="245" class="primary" stroke-width="4"/>
+
+
+
+  <!-- FEMTECH (Adjusted inward, no overlap) -->
+  <path id="topArc" d="M 120 300 A 180 180 0 0 1 480 300" fill="none"/>
+  <text class="text" font-size="44" font-weight="700">
+    <textPath href="#topArc" startOffset="50%" text-anchor="middle">
+      FEMTECH
+    </textPath>
+  </text>
+
+  <!-- Check Mark -->
+  <path d="M260 245 L290 275 L345 215"
+        stroke="#2f6fb2"
+        stroke-width="12"
+        fill="none"
+        stroke-linecap="round"
+        stroke-linejoin="round"/>
+
+  <!-- APPROVED -->
+  <text x="300" y="340"
+        text-anchor="middle"
+        class="text"
+        font-size="64"
+        font-weight="800">
+    APPROVED
+  </text>
+
+  <!-- Date -->
+  <text x="300" y="380"
+        text-anchor="middle"
+        class="text"
+        font-size="22"
+        font-weight="600">
+    DATE:  
+  </text>
+
+  <!-- Signature Line -->
+  <line x1="200" y1="430" x2="400" y2="430"
+        stroke="#2f6fb2"
+        stroke-width="3"/>
+  <text x="300" y="460"
+        text-anchor="middle"
+        class="text"
+        font-size="20"
+        font-weight="600">
+    SIGNATURE
+  </text>
+</svg>
