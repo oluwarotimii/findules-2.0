@@ -49,12 +49,40 @@ export async function GET(request: NextRequest) {
             where.date = new Date(date)
         }
 
+        const { searchParams } = new URL(request.url)
+        const page = parseInt(searchParams.get('page') || '1')
+        const limit = parseInt(searchParams.get('limit') || '10')
+        const skip = (page - 1) * limit
+
         const reconciliations = await prisma.reconciliation.findMany({
             where,
             orderBy: {
                 date: 'desc',
             },
-            include: {
+            select: {
+                serialNumber: true,
+                date: true,
+                cashierId: true,
+                cashierName: true,
+                branchId: true,
+                actualOpeningBalance: true,
+                actualTotalSales: true,
+                posTransactionsAmount: true,
+                transfersIn: true,
+                transfersOut: true,
+                discountsGiven: true,
+                refundsIssued: true,
+                turnOver: true,
+                cashWithdrawn: true,
+                expectedClosingBalance: true,
+                actualClosingBalance: true,
+                overageShortage: true,
+                varianceCategory: true,
+                status: true,
+                remarks: true,
+                submittedAt: true,
+                submittedBy: true,
+                approvalStatus: true,
                 cashier: {
                     select: {
                         name: true
@@ -65,10 +93,33 @@ export async function GET(request: NextRequest) {
                         branchName: true
                     }
                 }
+            },
+            skip,
+            take: limit
+        })
+
+        // Get total count for pagination metadata
+        const total = await prisma.reconciliation.count({ where })
+        const totalPages = Math.ceil(total / limit)
+
+        // Set cache headers for the response
+        const response = NextResponse.json({
+            data: reconciliations,
+            pagination: {
+                page,
+                limit,
+                total,
+                totalPages,
+                hasNext: page < totalPages,
+                hasPrev: page > 1
             }
         })
 
-        return NextResponse.json(reconciliations)
+        // Add HTTP caching headers
+        response.headers.set('Cache-Control', 'public, s-maxage=120, stale-while-revalidate=30') // Cache for 2 minutes (frequently changing data)
+        response.headers.set('Vary', 'Authorization')
+
+        return response
 
     } catch (error) {
         console.error('Error fetching reconciliations:', error)
@@ -205,6 +256,33 @@ export async function POST(request: NextRequest) {
 
                 submittedBy: user.id,
                 createdByIp: request.headers.get('x-forwarded-for') || 'unknown',
+            },
+            select: {
+                serialNumber: true,
+                date: true,
+                cashierId: true,
+                cashierName: true,
+                branchId: true,
+                actualOpeningBalance: true,
+                actualTotalSales: true,
+                posTransactionsAmount: true,
+                transfersIn: true,
+                transfersOut: true,
+                discountsGiven: true,
+                refundsIssued: true,
+                turnOver: true,
+                cashWithdrawn: true,
+                expectedClosingBalance: true,
+                actualClosingBalance: true,
+                overageShortage: true,
+                varianceCategory: true,
+                status: true,
+                remarks: true,
+                submittedAt: true,
+                submittedBy: true,
+                approvalStatus: true,
+                createdAt: true,
+                updatedAt: true
             }
         })
 

@@ -28,17 +28,52 @@ export async function GET(request: NextRequest) {
         // Actually, the Accountant (User) fills the form. They are STAFF or MANAGER.
         // So both should be able to list cashiers.
 
+        const { searchParams } = new URL(request.url)
+        const page = parseInt(searchParams.get('page') || '1')
+        const limit = parseInt(searchParams.get('limit') || '10')
+        const skip = (page - 1) * limit
+
         const cashiers = await prisma.cashier.findMany({
             where,
             orderBy: { name: 'asc' },
-            include: {
+            select: {
+                id: true,
+                name: true,
+                branchId: true,
+                status: true,
+                createdAt: true,
                 branch: {
-                    select: { branchName: true }
+                    select: {
+                        branchName: true
+                    }
                 }
+            },
+            skip,
+            take: limit
+        })
+
+        // Get total count for pagination metadata
+        const total = await prisma.cashier.count({ where })
+        const totalPages = Math.ceil(total / limit)
+
+        // Set cache headers for the response
+        const response = NextResponse.json({
+            data: cashiers,
+            pagination: {
+                page,
+                limit,
+                total,
+                totalPages,
+                hasNext: page < totalPages,
+                hasPrev: page > 1
             }
         })
 
-        return NextResponse.json(cashiers)
+        // Add HTTP caching headers
+        response.headers.set('Cache-Control', 'public, s-maxage=300, stale-while-revalidate=60') // Cache for 5 minutes
+        response.headers.set('Vary', 'Authorization')
+
+        return response
 
     } catch (error) {
         console.error('Error fetching cashiers:', error)
@@ -107,6 +142,18 @@ export async function POST(request: NextRequest) {
                     name,
                     branchId,
                     status: 'ACTIVE'
+                },
+                select: {
+                    id: true,
+                    name: true,
+                    branchId: true,
+                    status: true,
+                    createdAt: true,
+                    branch: {
+                        select: {
+                            branchName: true
+                        }
+                    }
                 }
             })
 

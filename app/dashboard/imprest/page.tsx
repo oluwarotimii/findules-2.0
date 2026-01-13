@@ -78,7 +78,14 @@ export default function ImprestPage() {
             })
             if (res.ok) {
                 const data = await res.json()
-                setBranches(data)
+                // Handle both the new paginated response and the old direct array response
+                if (Array.isArray(data)) {
+                  setBranches(data)
+                } else if (data.data && Array.isArray(data.data)) {
+                  setBranches(data.data)
+                } else {
+                  setBranches([])
+                }
             }
         } catch (error) {
             console.error('Error fetching branches:', error)

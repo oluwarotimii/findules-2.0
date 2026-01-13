@@ -1,5 +1,6 @@
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
+  previewFeatures = ["driverAdapters"]
 }
 
 datasource db {
@@ -8,26 +9,28 @@ datasource db {
 }
 
 model User {
-  id                       String                     @id @default(cuid()) @db.VarChar(30)
-  name                     String                     @db.VarChar(100)
-  email                    String                     @unique @db.VarChar(100)
-  passwordHash             String                     @db.Text
-  role                     Role                       @default(STAFF)
-  branchId                 String                     @db.VarChar(30)
-  status                   Status                     @default(ACTIVE)
-  createdAt                DateTime                   @default(now())
-  updatedAt                DateTime                   @updatedAt
-  auditLogs                AuditLog[]
-  cashRequisitions         CashRequisition[]
-  fuelCoupons              FuelCoupon[]
-  imprestIssued            Imprest[]                  @relation("ImprestIssuer")
-  imprestRetired           Imprest[]                  @relation("ImprestRetirer")
+  id                        String                     @id @default(cuid()) @db.VarChar(30)
+  name                      String                     @db.VarChar(100)
+  email                     String                     @unique @db.VarChar(100)
+  passwordHash              String                     @db.Text
+  role                      Role                       @default(STAFF)
+  branchId                  String                     @db.VarChar(30)
+  status                    Status                     @default(ACTIVE)
+  createdAt                 DateTime                   @default(now())
+  updatedAt                 DateTime                   @updatedAt
+  auditLogs                 AuditLog[]
   branchBalanceTransactions BranchBalanceTransaction[]
-  branch                   Branch                     @relation(fields: [branchId], references: [branchId])
+  cashRequisitions          CashRequisition[]
+  fuelCoupons               FuelCoupon[]
+  imprestIssued             Imprest[]                  @relation("ImprestIssuer")
+  imprestRetired            Imprest[]                  @relation("ImprestRetirer")
+  branch                    Branch                     @relation(fields: [branchId], references: [branchId])
 
-  @@index([email])
-  @@index([branchId])
-  @@index([status])
+  @@index([email], map: "idx_users_email")
+  @@index([branchId], map: "idx_users_branch")
+  @@index([status], map: "idx_users_status")
+  @@index([role], map: "idx_users_role")
+  @@index([createdAt], map: "idx_users_created_at")
   @@map("users")
 }
 
@@ -38,14 +41,18 @@ model Branch {
   location         String?           @db.VarChar(100)
   status           Status            @default(ACTIVE)
   createdAt        DateTime          @default(now())
+  branchBalance    BranchBalance?
   cashRequisitions CashRequisition[]
   cashiers         Cashier[]
   fuelCoupons      FuelCoupon[]
   imprest          Imprest[]
   reconciliations  Reconciliation[]
   users            User[]
-  branchBalance    BranchBalance?
 
+  @@index([branchName], map: "idx_branches_name")
+  @@index([branchCode], map: "idx_branches_code")
+  @@index([status], map: "idx_branches_status")
+  @@index([createdAt], map: "idx_branches_created_at")
   @@map("branches")
 }
 
@@ -82,58 +89,58 @@ model CashRequisition {
 }
 
 model Reconciliation {
-  serialNumber               String            @id @db.VarChar(20)
-  date                       DateTime          @db.Date
-  cashierId                  String            @db.VarChar(50)
-  cashierName                String            @db.VarChar(100)
-  branchId                   String            @db.VarChar(20)
-  actualOpeningBalance       Decimal           @default(0.00) @db.Decimal(15, 2)
-  actualTotalSales           Decimal           @default(0.00) @db.Decimal(15, 2)
-  posTransactionsAmount      Decimal           @default(0.00) @db.Decimal(15, 2)
-  cashTransaction            Decimal           @default(0.00) @db.Decimal(15, 2)
-  discountsGiven             Decimal           @default(0.00) @db.Decimal(15, 2)
-  refundsIssued              Decimal           @default(0.00) @db.Decimal(15, 2)
-  turnOver                   Decimal           @default(0.00) @db.Decimal(15, 2)
-  cashWithdrawn              Decimal           @default(0.00) @db.Decimal(15, 2)
-  withdrawalRecipient        String?           @db.VarChar(100)
-  withdrawalDetails          String?           @db.LongText
-  transfersIn                Decimal           @default(0.00) @db.Decimal(15, 2)
-  transfersOut               Decimal           @default(0.00) @db.Decimal(15, 2)
-  transferDetails            String?           @db.LongText
-  tellerNo                   String?           @db.VarChar(20)
-  bankName                   String?           @db.VarChar(100)
-  branchLocation             String?           @db.VarChar(100)
-  depositSlipNo              String?           @db.VarChar(50)
-  depositSlipUpload          String?           @db.VarChar(255)
-  expectedClosingBalance     Decimal           @default(0.00) @db.Decimal(15, 2)
-  actualClosingBalance       Decimal           @default(0.00) @db.Decimal(15, 2)
-  overageShortage            Decimal           @default(0.00) @db.Decimal(15, 2)
-  varianceCategory           VarianceCategory
-  status                     ReconciliationStatus @default(ACTIVE)
-  remarks                    String?           @db.Text
-  cashierSignature           String?           @db.VarChar(255)
-  supervisorName             String?           @db.VarChar(100)
-  supervisorSignature        String?           @db.VarChar(255)
-  supervisorComments         String?           @db.Text
-  submittedAt                DateTime          @default(now())
-  submittedBy                String            @db.VarChar(30)
-  approvalStatus             ApprovalStatus    @default(SUBMITTED)
-  createdAt                  DateTime          @default(now())
-  updatedAt                  DateTime          @updatedAt
-  createdByIp                String?           @db.VarChar(45)
-  lastModifiedBy             String?           @db.VarChar(30)
-  branch                     Branch            @relation(fields: [branchId], references: [branchId])
-  cashier                    Cashier           @relation(fields: [cashierId], references: [id])
+  serialNumber           String               @id @db.VarChar(20)
+  date                   DateTime             @db.Date
+  cashierId              String               @db.VarChar(50)
+  cashierName            String               @db.VarChar(100)
+  branchId               String               @db.VarChar(20)
+  actualOpeningBalance   Decimal              @default(0.00) @db.Decimal(15, 2)
+  actualTotalSales       Decimal              @default(0.00) @db.Decimal(15, 2)
+  posTransactionsAmount  Decimal              @default(0.00) @db.Decimal(15, 2)
+  cashTransaction        Decimal              @default(0.00) @db.Decimal(15, 2)
+  discountsGiven         Decimal              @default(0.00) @db.Decimal(15, 2)
+  refundsIssued          Decimal              @default(0.00) @db.Decimal(15, 2)
+  turnOver               Decimal              @default(0.00) @db.Decimal(15, 2)
+  cashWithdrawn          Decimal              @default(0.00) @db.Decimal(15, 2)
+  withdrawalRecipient    String?              @db.VarChar(100)
+  withdrawalDetails      String?              @db.LongText
+  transfersIn            Decimal              @default(0.00) @db.Decimal(15, 2)
+  transfersOut           Decimal              @default(0.00) @db.Decimal(15, 2)
+  transferDetails        String?              @db.LongText
+  tellerNo               String?              @db.VarChar(20)
+  bankName               String?              @db.VarChar(100)
+  branchLocation         String?              @db.VarChar(100)
+  depositSlipNo          String?              @db.VarChar(50)
+  depositSlipUpload      String?              @db.VarChar(255)
+  expectedClosingBalance Decimal              @default(0.00) @db.Decimal(15, 2)
+  actualClosingBalance   Decimal              @default(0.00) @db.Decimal(15, 2)
+  overageShortage        Decimal              @default(0.00) @db.Decimal(15, 2)
+  varianceCategory       VarianceCategory
+  status                 ReconciliationStatus @default(ACTIVE)
+  remarks                String?              @db.Text
+  cashierSignature       String?              @db.VarChar(255)
+  supervisorName         String?              @db.VarChar(100)
+  supervisorSignature    String?              @db.VarChar(255)
+  supervisorComments     String?              @db.Text
+  submittedAt            DateTime             @default(now())
+  submittedBy            String               @db.VarChar(30)
+  approvalStatus         ApprovalStatus       @default(SUBMITTED)
+  createdAt              DateTime             @default(now())
+  updatedAt              DateTime             @updatedAt
+  createdByIp            String?              @db.VarChar(45)
+  lastModifiedBy         String?              @db.VarChar(30)
+  branch                 Branch               @relation(fields: [branchId], references: [branchId])
+  cashier                Cashier              @relation(fields: [cashierId], references: [id])
 
-  @@index([branchId, date])
-  @@index([cashierId, date])
-  @@index([date])
-  @@index([varianceCategory])
-  @@index([status])
-  @@index([approvalStatus])
-  @@index([date, approvalStatus])
-  @@index([branchId, approvalStatus])
-  @@index([branchId, date, approvalStatus])
+  @@index([branchId], map: "idx_reconciliations_branch")
+  @@index([cashierId], map: "idx_reconciliations_cashier")
+  @@index([date], map: "idx_reconciliations_date")
+  @@index([status], map: "idx_reconciliations_status")
+  @@index([approvalStatus], map: "idx_reconciliations_approval")
+  @@index([branchId, date], map: "idx_reconciliations_branch_date")
+  @@index([cashierId, date], map: "idx_reconciliations_cashier_date")
+  @@index([date, approvalStatus], map: "idx_reconciliations_date_approval")
+  @@index([varianceCategory], map: "idx_reconciliations_variance")
   @@map("reconciliations")
 }
 
@@ -147,7 +154,10 @@ model Cashier {
   branch          Branch           @relation(fields: [branchId], references: [branchId])
   reconciliations Reconciliation[]
 
-  @@index([branchId])
+  @@index([branchId], map: "idx_cashiers_branch")
+  @@index([status], map: "idx_cashiers_status")
+  @@index([name], map: "idx_cashiers_name")
+  @@index([createdAt], map: "idx_cashiers_created_at")
   @@map("cashiers")
 }
 
@@ -228,7 +238,7 @@ model AuditLog {
   userId    String   @db.VarChar(30)
   action    String   @db.VarChar(50)
   module    String?  @db.VarChar(50)
-  details   Json?    @db.Json
+  details   String?  @db.LongText
   ipAddress String?  @db.VarChar(45)
   user      User     @relation(fields: [userId], references: [id])
 
@@ -239,16 +249,16 @@ model AuditLog {
 }
 
 model BranchBalance {
-  id              String                     @id @default(cuid()) @db.VarChar(30)
-  branchId        String                     @unique @db.VarChar(20)
-  openingBalance  Decimal                    @default(0.00) @db.Decimal(15, 2)
-  currentBalance  Decimal                    @default(0.00) @db.Decimal(15, 2)
-  totalIssued     Decimal                    @default(0.00) @db.Decimal(15, 2)
-  totalRetired    Decimal                    @default(0.00) @db.Decimal(15, 2)
-  lastUpdated     DateTime                   @updatedAt
-  createdAt       DateTime                   @default(now())
-  branch          Branch                     @relation(fields: [branchId], references: [branchId])
-  transactions    BranchBalanceTransaction[]
+  id             String                     @id @default(cuid()) @db.VarChar(30)
+  branchId       String                     @unique @db.VarChar(20)
+  openingBalance Decimal                    @default(0.00) @db.Decimal(15, 2)
+  currentBalance Decimal                    @default(0.00) @db.Decimal(15, 2)
+  totalIssued    Decimal                    @default(0.00) @db.Decimal(15, 2)
+  totalRetired   Decimal                    @default(0.00) @db.Decimal(15, 2)
+  lastUpdated    DateTime                   @updatedAt
+  createdAt      DateTime                   @default(now())
+  transactions   BranchBalanceTransaction[]
+  branch         Branch                     @relation(fields: [branchId], references: [branchId])
 
   @@index([branchId])
   @@map("branch_balances")
@@ -304,13 +314,6 @@ enum PaymentMethod {
   CASH
   BANK_TRANSFER
   CHEQUE
-}
-
-enum Shift {
-  MORNING
-  AFTERNOON
-  EVENING
-  NIGHT
 }
 
 enum VarianceCategory {

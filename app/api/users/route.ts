@@ -21,6 +21,11 @@ export async function GET(request: NextRequest) {
             return NextResponse.json({ error: 'Forbidden - Manager access required' }, { status: 403 })
         }
 
+        const { searchParams } = new URL(request.url)
+        const page = parseInt(searchParams.get('page') || '1')
+        const limit = parseInt(searchParams.get('limit') || '10')
+        const skip = (page - 1) * limit
+
         const users = await prisma.user.findMany({
             select: {
                 id: true,
@@ -39,10 +44,33 @@ export async function GET(request: NextRequest) {
             },
             orderBy: {
                 createdAt: 'desc'
+            },
+            skip,
+            take: limit
+        })
+
+        // Get total count for pagination metadata
+        const total = await prisma.user.count()
+        const totalPages = Math.ceil(total / limit)
+
+        // Set cache headers for the response
+        const response = NextResponse.json({
+            data: users,
+            pagination: {
+                page,
+                limit,
+                total,
+                totalPages,
+                hasNext: page < totalPages,
+                hasPrev: page > 1
             }
         })
 
-        return NextResponse.json(users)
+        // Add HTTP caching headers
+        response.headers.set('Cache-Control', 'public, s-maxage=300, stale-while-revalidate=60') // Cache for 5 minutes
+        response.headers.set('Vary', 'Authorization')
+
+        return response
 
     } catch (error) {
         console.error('Error fetching users:', error)

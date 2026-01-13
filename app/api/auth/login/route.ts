@@ -1,9 +1,29 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { prisma } from '@/lib/prisma'
 import { verifyPassword, generateToken } from '@/lib/auth'
+import { loginLimiter, getClientIP } from '@/lib/rate-limit'
 
 export async function POST(request: NextRequest) {
     try {
+        // Rate limiting for login attempts
+        const clientIP = getClientIP(request)
+        const rateLimitResult = await loginLimiter.check(`login_${clientIP}`)
+
+        if (!rateLimitResult.allowed) {
+            return NextResponse.json(
+                {
+                    error: 'Too many login attempts. Please try again later.',
+                    retryAfter: rateLimitResult.retryAfter
+                },
+                {
+                    status: 429,
+                    headers: {
+                        'Retry-After': rateLimitResult.retryAfter.toString()
+                    }
+                }
+            )
+        }
+
         const body = await request.json()
         const { email, password } = body
 
@@ -16,7 +36,20 @@ export async function POST(request: NextRequest) {
 
         const user = await prisma.user.findUnique({
             where: { email },
-            include: { branch: true },
+            select: {
+                id: true,
+                name: true,
+                email: true,
+                passwordHash: true,
+                role: true,
+                branchId: true,
+                status: true,
+                branch: {
+                    select: {
+                        branchName: true
+                    }
+                }
+            },
         })
 
         console.log('Login attempt for:', email)
